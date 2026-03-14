@@ -1,0 +1,65 @@
+{
+  "_readme": "JSON does not support comments. Use _comment fields for documentation. Never commit real tokens — use environment variable references only.",
+
+  "mcpServers": {
+
+    "github": {
+      "_comment": [
+        "Official GitHub MCP server by Anthropic/GitHub.",
+        "Provides: read/write repos, issues, PRs, branches, files, search.",
+        "Setup:",
+        "  1. Create a PAT at https://github.com/settings/tokens",
+        "     Scopes needed: repo, read:org, read:user",
+        "  2. Set GITHUB_PERSONAL_ACCESS_TOKEN in your environment",
+        "     or replace the env ref below with the actual value (never commit it).",
+        "Docs: https://github.com/modelcontextprotocol/servers/tree/main/src/github"
+      ],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+
+    "feishu": {
+      "_comment": [
+        "Feishu (Lark) MCP server — community-maintained.",
+        "Provides: read/send messages, manage docs, calendar, and bitable (sheets).",
+        "Setup:",
+        "  1. Create a Feishu app at https://open.feishu.cn/app",
+        "  2. Enable the APIs you need under 'Permissions & Scopes'",
+        "  3. Set FEISHU_APP_ID and FEISHU_APP_SECRET in your environment.",
+        "     For user-level access also set FEISHU_USER_ACCESS_TOKEN.",
+        "Docs: https://github.com/larksuite/mcp-server-lark"
+      ],
+      "command": "npx",
+      "args": ["-y", "mcp-server-lark"],
+      "env": {
+        "FEISHU_APP_ID": "${FEISHU_APP_ID}",
+        "FEISHU_APP_SECRET": "${FEISHU_APP_SECRET}"
+      }
+    },
+
+    "filesystem": {
+      "_comment": [
+        "Official Filesystem MCP server — read/write local files.",
+        "Provides: read, write, move, search files within allowed directories.",
+        "Setup:",
+        "  1. Edit the 'args' list below.",
+        "  2. After 'server-filesystem', list every directory Claude is allowed to access.",
+        "  3. Claude cannot access paths outside this list — be explicit.",
+        "  4. No credentials needed. Runs fully local.",
+        "Example allowed dirs: /Users/leo/projects  /Users/leo/notes",
+        "Docs: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem"
+      ],
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${HOME}/claude-os",
+        "${HOME}/projects"
+      ]
+    }
+
+  }
+}

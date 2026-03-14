@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "branch=$(git branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ] || [ \"$branch\" = \"master\" ]; then echo \"BLOCKED: Direct edits on '$branch' branch are not allowed. Create a feature branch first.\"; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -z \"$file\" ] || [ ! -f \"$file\" ]; then exit 0; fi; ext=\"${file##*.}\"; case \"$ext\" in js|ts|jsx|tsx|json|css|html|md) prettier --write \"$file\" 2>/dev/null || true ;; py) black \"$file\" 2>/dev/null || true ;; go) gofmt -w \"$file\" 2>/dev/null || true ;; sh|bash) shfmt -w \"$file\" 2>/dev/null || true ;; esac"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "context=\"$HOME/claude-os/memory/context.md\"; if [ -f \"$context\" ]; then echo \"--- Loaded context.md ---\"; cat \"$context\"; echo \"--- End context.md ---\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"\"; echo \"Session ending. If anything important was decided, learned, or changed — update ~/claude-os/memory/context.md before closing.\""
+          }
+        ]
+      }
+    ]
+  }
+}
