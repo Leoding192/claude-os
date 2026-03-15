@@ -1,0 +1,9 @@
+# Codex runtime output
+.agents/skills/codex/.runtime/
+
+# OS
+.DS_Store
+
+# Secrets (never commit)
+.env
+.env.*

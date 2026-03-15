@@ -8,14 +8,20 @@ agents, hooks, memory, and rules, version-controlled.
 claude-os/
 ├── CLAUDE.md                  ← you are here
 ├── .mcp.json                  ← MCP servers
+├── skills-lock.json           ← installed skill versions (auto-generated)
+├── .gitignore
 ├── .claude/
 │   ├── settings.json          ← hooks
 │   ├── agents/                ← planner / coder / reviewer / documenter
-│   ├── commands/              ← slash commands
-│   ├── hooks/                 ← external hook scripts
-│   └── skills/                ← reusable workflows
+│   ├── commands/              ← slash commands: /plan /review /remember
+│   ├── hooks/                 ← external hook scripts (future)
+│   └── skills/                ← symlinks into .agents/skills/
+├── .agents/
+│   └── skills/
+│       └── codex/             ← Codex CLI skill (via `npx skills add`)
 └── memory/
-    └── context.md             ← read this first every session
+    ├── session.md             ← injected every session (current work only)
+    └── decisions.md          ← long-term decisions & lessons (read on demand)
 ```
 
 ## Agents
@@ -27,15 +33,29 @@ claude-os/
 | `documenter` | Docs missing or outdated |
 
 ## Hooks (settings.json)
-| Event | Behavior |
+| Event | Matcher | Behavior |
+|---|---|---|
+| `PreToolUse` | `Edit\|Write\|MultiEdit\|NotebookEdit` | Block edits on main/master |
+| `PostToolUse` | `Edit\|Write\|MultiEdit` | Auto-format; warn if formatter missing |
+| `UserPromptSubmit` | — | Inject `memory/session.md` (repo-relative path) |
+| `Stop` | — | Remind to update `memory/session.md` |
+
+## Commands
+| Command | Purpose |
 |---|---|
-| `PreToolUse` | Block edits on main/master |
-| `PostToolUse` | Auto-format (prettier/black/gofmt) |
-| `UserPromptSubmit` | Inject memory/context.md |
-| `Stop` | Remind to update context.md |
+| `/plan <task>` | Decompose task into a reviewed plan before implementing |
+| `/review [target]` | Review file, diff, or recent changes |
+| `/remember <thing>` | Persist a decision or lesson to `memory/decisions.md` |
+
+## Memory
+| File | Injected? | Purpose |
+|---|---|---|
+| `memory/session.md` | ✅ Every session | Current in-progress work, blockers, next steps |
+| `memory/decisions.md` | ❌ On demand | Settled decisions, lessons learned, patterns |
 
 ## Extending
 - New agent → `.claude/agents/<name>.md` with frontmatter `description`
 - New hook → `.claude/settings.json`
 - New command → `.claude/commands/<name>.md`
+- New skill → `npx skills add <repo>`
 - New MCP → `.mcp.json`

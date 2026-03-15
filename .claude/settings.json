@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|NotebookEdit",
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
@@ -13,11 +13,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "file=$(python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -z \"$file\" ] || [ ! -f \"$file\" ]; then exit 0; fi; ext=\"${file##*.}\"; case \"$ext\" in js|ts|jsx|tsx|json|css|html|md) prettier --write \"$file\" 2>/dev/null || true ;; py) black \"$file\" 2>/dev/null || true ;; go) gofmt -w \"$file\" 2>/dev/null || true ;; sh|bash) shfmt -w \"$file\" 2>/dev/null || true ;; esac"
+            "command": "file=$(python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -z \"$file\" ] || [ ! -f \"$file\" ]; then exit 0; fi; ext=\"${file##*.}\"; case \"$ext\" in js|ts|jsx|tsx|json|css|html|md) if command -v prettier &>/dev/null; then prettier --write \"$file\" 2>/dev/null; else echo \"[warn] prettier not found — $file not formatted\"; fi ;; py) if command -v black &>/dev/null; then black \"$file\" 2>/dev/null; else echo \"[warn] black not found — $file not formatted\"; fi ;; go) gofmt -w \"$file\" 2>/dev/null ;; sh|bash) if command -v shfmt &>/dev/null; then shfmt -w \"$file\" 2>/dev/null; else echo \"[warn] shfmt not found — $file not formatted\"; fi ;; esac"
           }
         ]
       }
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "context=\"$HOME/claude-os/memory/context.md\"; if [ -f \"$context\" ]; then echo \"--- Loaded context.md ---\"; cat \"$context\"; echo \"--- End context.md ---\"; fi"
+            "command": "root=$(git -C \"${CLAUDE_PROJECT_DIR:-$PWD}\" rev-parse --show-toplevel 2>/dev/null || echo \"$HOME/claude-os\"); session=\"$root/memory/session.md\"; if [ -f \"$session\" ]; then echo \"--- session.md ---\"; cat \"$session\"; echo \"--- end ---\"; fi"
           }
         ]
       }
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"\"; echo \"Session ending. If anything important was decided, learned, or changed — update ~/claude-os/memory/context.md before closing.\""
+            "command": "root=$(git -C \"${CLAUDE_PROJECT_DIR:-$PWD}\" rev-parse --show-toplevel 2>/dev/null || echo \"$HOME/claude-os\"); echo \"\"; echo \"Session ending. Update $root/memory/session.md with current work state if anything changed.\""
           }
         ]
       }
