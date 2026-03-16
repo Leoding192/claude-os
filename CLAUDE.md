@@ -44,7 +44,7 @@ claude-os/
 | Command | Purpose |
 |---|---|
 | `/plan <task>` | Decompose task into a reviewed plan before implementing |
-| `/review [target]` | Review file, diff, or recent changes |
+| `/review [target]` | Review file, diff, or recent changes — prompts for engine (Claude Code or Codex) |
 | `/remember <thing>` | Persist a decision or lesson to `memory/decisions.md` |
 
 ## Memory
