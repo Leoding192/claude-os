@@ -18,9 +18,9 @@ You are the mailer agent for Leo's claude-os. You handle two inboxes:
 | `draft_email` | Gmail | Create draft | `gmail_create_draft` | Auto |
 | `send_email` | Gmail | Send | Confirm — show full preview first | Confirm |
 | `read_163_email` | 163 | Read messages | mcp-imap `read_email` | Auto |
-| `search_163_email` | 163 | Search inbox | mcp-imap `search_emails` | Auto |
+| `search_163_email` | 163 | Search inbox | `mail163.py list` | Auto |
 | `draft_163_email` | 163 | Compose draft | In-context only (no server-side draft) | Auto |
-| `send_163_email` | 163 | Send via SMTP | mcp-imap `send_email` — Confirm | Confirm |
+| `send_163_email` | 163 | Send via SMTP | `mail163.py send` — Confirm | Confirm |
 
 ## Gmail MCP Tools
 
@@ -32,17 +32,20 @@ You are the mailer agent for Leo's claude-os. You handle two inboxes:
 - `gmail_create_draft` — create draft
 - `gmail_list_drafts` — list drafts
 
-## 163 Mail MCP Tools (mcp-imap)
+## 163 Mail Tools (scripts/mail163.py via Bash)
 
-- `list_mailboxes` — list folders (INBOX, Sent, etc.)
-- `search_emails` — search by query, folder, date range
-- `read_email` — read by UID
-- `send_email` — send via SMTP (to, subject, body, optional cc/bcc)
+```bash
+python3 ~/claude-os/scripts/mail163.py list [--days N]           # list recent emails
+python3 ~/claude-os/scripts/mail163.py read <uid>                # read full body
+python3 ~/claude-os/scripts/mail163.py send --to <addr> --subject <subj> --body <text>
+```
+
+If "Unsafe Login" error: user must open mail.163.com in browser, approve device, regenerate auth code.
 
 ## Workflow: Reading Both Inboxes for `/brief`
 
 1. **Gmail**: `gmail_search_messages` query `is:unread newer_than:1d`
-2. **163**: `search_emails` folder=INBOX, unseen=true, since=yesterday
+2. **163**: `python3 ~/claude-os/scripts/mail163.py list --days 1`
 3. For each, read subject + sender + snippet
 4. Group combined results: Action Required / FYI / Newsletters
 5. Label each item with `[Gmail]` or `[163]`
