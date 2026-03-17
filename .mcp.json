@@ -40,6 +40,42 @@
       }
     },
 
+    "gmail": {
+      "_comment": [
+        "Gmail MCP — provided by Claude.ai's built-in Gmail integration.",
+        "Provides: search messages, read messages/threads, create drafts, list labels.",
+        "No separate server needed — available as mcp__claude_ai_Gmail__ tools when",
+        "Claude.ai's Gmail integration is connected in your account settings.",
+        "Capabilities: read_email (Auto), search_email (Auto), draft_email (Auto), send_email (Confirm)"
+      ],
+      "_status": "active — provided by Claude.ai Gmail integration, no server entry needed"
+    },
+
+    "apple-calendar": {
+      "_comment": [
+        "Apple Calendar — accessed via AppleScript through the Bash tool.",
+        "No separate MCP server. The scheduler agent uses osascript commands.",
+        "Provides: read events, create events, update events, delete events.",
+        "Setup: Calendar.app must be running and authorized.",
+        "         System Preferences → Privacy & Security → Automation → allow Terminal",
+        "Capabilities: read_calendar (Auto), create_calendar_event (Confirm),",
+        "              update_calendar_event (Confirm), delete_calendar_event (Confirm)",
+        "Implementation: see .claude/agents/scheduler.md for AppleScript patterns"
+      ],
+      "_status": "active — no server entry needed, uses Bash/AppleScript"
+    },
+
+    "notifications": {
+      "_comment": [
+        "macOS Notifications — sent via osascript through the Bash tool.",
+        "No separate MCP server needed.",
+        "Usage: osascript -e 'display notification \"<msg>\" with title \"<title>\"'",
+        "Capabilities: send_notification (Auto)",
+        "Used by: /brief (completion ping), Layer 4 proactive tasks"
+      ],
+      "_status": "active — no server entry needed, uses Bash/osascript"
+    },
+
     "filesystem": {
       "_comment": [
         "Official Filesystem MCP server — read/write local files.",

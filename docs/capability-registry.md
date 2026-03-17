@@ -59,12 +59,14 @@ Each entry defines tier, reversibility class, and valid entry points.
 
 ### Calendar
 
+Implemented via AppleScript through the Bash tool. Calendar.app must be running.
+
 | capability_id | agent / tool | tier | reversibility | valid entry points |
 |---|---|---|---|---|
-| `read_calendar` | Calendar MCP (scheduler) | Auto | — | /brief, natural language |
-| `create_calendar_event` | Calendar MCP (scheduler) | Confirm | Reversible (delete event) | natural language |
-| `delete_calendar_event` | Calendar MCP (scheduler) | Confirm | Irreversible | explicit instruction only |
-| `update_calendar_event` | Calendar MCP (scheduler) | Confirm | Reversible (restore original) | natural language |
+| `read_calendar` | scheduler agent (osascript) | Auto | — | /brief, natural language |
+| `create_calendar_event` | scheduler agent (osascript) | Confirm | Reversible (delete event) | natural language |
+| `delete_calendar_event` | scheduler agent (osascript) | Confirm | Irreversible | explicit instruction only |
+| `update_calendar_event` | scheduler agent (osascript) | Confirm | Reversible (restore original) | natural language |
 
 ### Feishu / Lark
 
@@ -92,9 +94,11 @@ Each entry defines tier, reversibility class, and valid entry points.
 
 ### System & Secrets
 
+Notifications via osascript (no MCP server needed).
+
 | capability_id | agent / tool | tier | reversibility | valid entry points |
 |---|---|---|---|---|
-| `send_notification` | Notifications MCP | Auto | — | any |
+| `send_notification` | Bash (osascript) | Auto | — | any |
 | `read_env_var` | Bash (env) | Auto | — | any |
 | `write_env_file` | Bash | Blocked | — | never |
 | `read_keychain` | Bash (security) | Auto | — | install.sh / MCP startup only |
@@ -109,3 +113,4 @@ Each entry defines tier, reversibility class, and valid entry points.
 | Date | Change |
 |---|---|
 | 2026-03-16 | Initial registry — Layer 0 + Layer 2–3 planned capabilities |
+| 2026-03-16 | Layer 2: Calendar (osascript), Notifications (osascript), Gmail (Claude.ai built-in) — implementation details added |

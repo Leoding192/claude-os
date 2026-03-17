@@ -31,6 +31,8 @@ claude-os/
 | `coder` | Plan approved, scope locked |
 | `reviewer` | Before merging |
 | `documenter` | Docs missing or outdated |
+| `scheduler` | Calendar, events, reminders, today's agenda |
+| `mailer` | Email — read, draft, reply, send |
 
 ## Hooks (settings.json)
 | Event | Matcher | Behavior |
@@ -49,6 +51,9 @@ claude-os/
 | `/task <intent>` | Start a state-tracked task (PLANNING → EXECUTING → COMPLETED) |
 | `/undo-last` | Undo the most recent Reversible-class action |
 | `/consolidate` | Archive stale L3 memory entries |
+| `/brief [date]` | Daily brief: calendar events + email summary |
+| `/draft-email <desc>` | Draft an email with writing preferences applied |
+| `/capture "<text>"` | Quick-capture a thought/task into session memory |
 
 ## Memory
 | Layer | Location | Injected? | Purpose |
