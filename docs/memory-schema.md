@@ -110,10 +110,28 @@ Summary:
 
 ---
 
+## Auto-Clear on Session End
+
+The Stop hook automatically rewrites `session.md` when a session ends:
+
+1. Extracts any `- [ ]` incomplete tasks from all sections
+2. Extracts the first non-empty "In Progress" item as a one-line summary
+3. Rewrites the file with:
+   - `> Last session: YYYY-MM-DD — <summary>` header line
+   - Incomplete tasks carried forward under `## Next Up`
+   - Fresh empty template for the new session
+4. Prints: `[claude-os] session.md auto-cleared. N task(s) carried forward.`
+
+**What gets preserved**: incomplete `- [ ]` tasks + summary line
+**What gets cleared**: completed tasks, captures, blocked items, verbose detail
+
+This means session.md never accumulates stale content. Durable information (decisions, writing preferences, people context) should be in L3, not L1.
+
 ## Relationship to Session Injection
 
 The `UserPromptSubmit` hook reads `memory/session.md` and injects it into every prompt. This means:
 - Keep L1 short (≤ 50 lines)
 - Only current-session state belongs here
 - Historical decisions go in L3 (`decisions.md`)
+- Writing preferences go in L3 (`memory/writing.md`)
 - Project context goes in L2 (`memory/projects/`)
