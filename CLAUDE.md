@@ -46,12 +46,21 @@ claude-os/
 | `/plan <task>` | Decompose task into a reviewed plan before implementing |
 | `/review [target]` | Review file, diff, or recent changes — prompts for engine (Claude Code or Codex) |
 | `/remember <thing>` | Persist a decision or lesson to `memory/decisions.md` |
+| `/task <intent>` | Start a state-tracked task (PLANNING → EXECUTING → COMPLETED) |
+| `/undo-last` | Undo the most recent Reversible-class action |
+| `/consolidate` | Archive stale L3 memory entries |
 
 ## Memory
-| File | Injected? | Purpose |
-|---|---|---|
-| `memory/session.md` | ✅ Every session | Current in-progress work, blockers, next steps |
-| `memory/decisions.md` | ❌ On demand | Settled decisions, lessons learned, patterns |
+| Layer | Location | Injected? | Purpose |
+|---|---|---|---|
+| L1 | `memory/session.md` | ✅ Every session | Current work state (≤50 lines) |
+| L2 | `memory/projects/<name>.md` | ❌ On demand | Per-project decisions and context |
+| L3 | `memory/decisions.md`, `memory/people/`, `memory/writing.md` | ❌ On demand | Durable decisions, people context, writing style |
+| L4 | `memory/archive/YYYY-MM/` | ❌ Never | Archived stale L3 entries (retained 2 years) |
+
+**Write rule:** Only write to L1–L3 on explicit `/remember` or "记住" signal. Never auto-promote.
+
+See full spec: [docs/memory-schema.md](docs/memory-schema.md)
 
 ## Orchestration Rules
 
@@ -65,6 +74,21 @@ Before starting any multi-step task:
 7. On unrecoverable error: set state FAILED, surface clearly, do not retry silently
 
 See full spec: [docs/runtime-state-model.md](docs/runtime-state-model.md)
+
+## Automation Risk Model
+
+Before invoking any capability:
+1. Look up `capability_id` in `docs/capability-registry.md` — if not found, hard block
+2. If registered tier is **Blocked**, hard block regardless of context
+3. Compute `risk_score = max(blast_radius, reversibility) * 0.5 + confidence_uncertainty * 0.3 + external_side_effect * 0.2`
+4. Apply floor rule: execution path = max(computed_path, registered_tier_floor)
+5. Execute path:
+   - Score 0.0–0.3 → **Auto** (silent)
+   - Score 0.4–0.6 → **Confirm** (surface summary, require "yes")
+   - Score 0.7–1.0 → **Escalate** (do not attempt; ask user to confirm intent first)
+6. When intent is inferred rather than explicit, add confidence_uncertainty = 0.5–1.0
+
+See full spec: [docs/automation-risk-model.md](docs/automation-risk-model.md)
 
 ## Security & Governance
 
