@@ -20,6 +20,15 @@
             "command": "file=$(python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -z \"$file\" ] || [ ! -f \"$file\" ]; then exit 0; fi; ext=\"${file##*.}\"; case \"$ext\" in js|ts|jsx|tsx|json|css|html|md) if command -v prettier &>/dev/null; then prettier --write \"$file\" 2>/dev/null; else echo \"[warn] prettier not found — $file not formatted\"; fi ;; py) if command -v black &>/dev/null; then black \"$file\" 2>/dev/null; else echo \"[warn] black not found — $file not formatted\"; fi ;; go) gofmt -w \"$file\" 2>/dev/null ;; sh|bash) if command -v shfmt &>/dev/null; then shfmt -w \"$file\" 2>/dev/null; else echo \"[warn] shfmt not found — $file not formatted\"; fi ;; esac"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os, datetime\ntry:\n    d = json.load(sys.stdin)\n    cmd = d.get('tool_input', {}).get('command', '')\n    result = d.get('tool_response', {}).get('output', '')[:200]\n    # Only log Confirm-tier Bash operations\n    confirm_patterns = ['git push', 'git reset --hard', 'security add-generic-password', 'rm -rf', 'send', 'delete']\n    if not any(p in cmd for p in confirm_patterns):\n        sys.exit(0)\n    log_dir = os.path.expanduser('~/claude-os/logs')\n    os.makedirs(log_dir, exist_ok=True)\n    entry = json.dumps({\n        'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',\n        'tool': 'Bash',\n        'action': cmd[:300],\n        'result': result,\n        'confirmed_by_user': True\n    })\n    with open(os.path.join(log_dir, 'audit.jsonl'), 'a') as f:\n        f.write(entry + '\\n')\nexcept Exception:\n    pass\n\" 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [

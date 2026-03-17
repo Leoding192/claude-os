@@ -53,9 +53,25 @@ claude-os/
 | `memory/session.md` | ✅ Every session | Current in-progress work, blockers, next steps |
 | `memory/decisions.md` | ❌ On demand | Settled decisions, lessons learned, patterns |
 
+## Security & Governance
+
+### Permission Tiers
+| Tier | Examples | Behaviour |
+|---|---|---|
+| **Auto** | Read files, read email, search, git read, run codex | Execute silently |
+| **Confirm** | Write/delete files, send email, send Feishu message, git push, modify calendar | Show action summary → require explicit "yes" |
+| **Blocked** | Push to main, touch .env/secrets, write prod config | Hard block, never execute |
+
+All capabilities are catalogued in [docs/capability-registry.md](docs/capability-registry.md).
+
+### Audit Log
+Confirm-tier Bash operations are logged to `logs/audit.jsonl` automatically via PostToolUse hook.
+Format: `{ timestamp, tool, action, result, confirmed_by_user }`
+
 ## Extending
 - New agent → `.claude/agents/<name>.md` with frontmatter `description`
 - New hook → `.claude/settings.json`
 - New command → `.claude/commands/<name>.md`
 - New skill → `npx skills add <repo>`
 - New MCP → `.mcp.json`
+- New capability → `docs/capability-registry.md` (register before implementing)

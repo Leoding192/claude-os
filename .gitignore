@@ -1,6 +1,9 @@
 # Codex runtime output
 .agents/skills/codex/.runtime/
 
+# Audit logs (generated at runtime)
+logs/*.jsonl
+
 # OS
 .DS_Store
 
