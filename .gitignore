@@ -4,6 +4,11 @@
 # Audit logs (generated at runtime)
 logs/*.jsonl
 
+# Morning brief outputs (generated at runtime)
+logs/briefs/
+logs/launchd-brief.log
+logs/launchd-brief-err.log
+
 # OS
 .DS_Store
 

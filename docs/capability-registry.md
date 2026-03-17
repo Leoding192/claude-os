@@ -99,6 +99,17 @@ Notifications via osascript (no MCP server needed).
 
 ---
 
+### Layer 4 — Proactive Execution
+
+| capability_id | agent / tool | tier | reversibility | valid entry points |
+|---|---|---|---|---|
+| `schedule_morning_brief` | install.sh (launchd) | Auto | Reversible (launchctl unload) | install.sh |
+| `run_morning_brief` | scripts/morning-brief.sh | Auto | — | launchd / manual |
+| `adversarial_review` | reviewer agent + Codex | Auto | — | /adversarial-review |
+| `write_pipeline` | Claude + Codex | Auto | — | /write |
+
+---
+
 ## Changelog
 
 | Date | Change |
@@ -106,3 +117,4 @@ Notifications via osascript (no MCP server needed).
 | 2026-03-16 | Initial registry — Layer 0 + Layer 2–3 planned capabilities |
 | 2026-03-16 | Layer 2: Calendar (osascript), Notifications (osascript), Gmail (Claude.ai built-in) — implementation details added |
 | 2026-03-17 | Removed Feishu and 163邮箱; email integration is Gmail only (Claude.ai built-in) |
+| 2026-03-17 | Layer 4: added schedule_morning_brief, run_morning_brief, adversarial_review, write_pipeline |

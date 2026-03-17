@@ -157,6 +157,5 @@ See [`docs/`](docs/) for the full system design spec.
 | Memory Schema (L0–L4) | ✅ | Layered memory with write policy + `/consolidate` |
 | Layer 2 — macOS Integration | ✅ | Calendar (AppleScript), Gmail MCP, Notifications |
 | Unified Entry | ✅ | Raycast scripts + keyboard shortcuts |
-| Layer 3 — Communication | ⬜ | Feishu full integration |
-| Layer 4 — Proactive Execution | ⬜ | `/brief` auto-schedule, `/loop`, `/adversarial-review` |
+| Layer 4 — Proactive Execution | ✅ | `/brief` launchd schedule (08:30), `/adversarial-review`, `/write` pipeline |
 | Layer 5 — Knowledge System | ⬜ | `memory/projects/`, `memory/people/`, `/consolidate` active |

@@ -51,9 +51,11 @@ claude-os/
 | `/task <intent>` | Start a state-tracked task (PLANNING → EXECUTING → COMPLETED) |
 | `/undo-last` | Undo the most recent Reversible-class action |
 | `/consolidate` | Archive stale L3 memory entries |
-| `/brief [date]` | Daily brief: calendar events + email summary |
+| `/brief [date]` | Daily brief: calendar events + email summary (also runs automatically at 08:30 via launchd) |
 | `/draft-email <desc>` | Draft an email with writing preferences applied |
 | `/capture "<text>"` | Quick-capture a thought/task into session memory |
+| `/adversarial-review [target]` | Dual-engine review: Claude + Codex blind, side-by-side comparison |
+| `/write <topic>` | Writing pipeline: draft → Codex blind review → revised output |
 
 ## Memory
 | Layer | Location | Injected? | Purpose |

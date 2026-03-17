@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.claude-os.morning-brief</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/dingfuying/claude-os/scripts/morning-brief.sh</string>
+  </array>
+
+  <!-- Run every day at 08:30 — change Hour/Minute to adjust -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>8</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/dingfuying/claude-os/logs/launchd-brief.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/dingfuying/claude-os/logs/launchd-brief-err.log</string>
+
+  <!-- Only run when logged in (not on login window) -->
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

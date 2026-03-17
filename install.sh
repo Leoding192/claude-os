@@ -130,7 +130,31 @@ else
   log "  Scripts are ready at: $REPO_DIR/raycast/"
 fi
 
-# ── 8. Summary ────────────────────────────────────────────────────────────────
+# ── 8. Morning Brief (launchd) ────────────────────────────────────────────────
+step "Morning Brief — launchd schedule"
+
+PLIST_SRC="$REPO_DIR/launchd/com.claude-os.morning-brief.plist"
+PLIST_DST="$HOME/Library/LaunchAgents/com.claude-os.morning-brief.plist"
+
+if [ -f "$PLIST_DST" ]; then
+  if [ "$ROTATE_SECRETS" = true ]; then
+    launchctl unload "$PLIST_DST" 2>/dev/null || true
+    cp "$PLIST_SRC" "$PLIST_DST"
+    launchctl load "$PLIST_DST"
+    log "  ✓ Morning brief job reloaded (runs daily at 08:30)"
+  else
+    log "  ✓ Morning brief already installed (use --rotate-secrets to reinstall)"
+  fi
+else
+  cp "$PLIST_SRC" "$PLIST_DST"
+  launchctl load "$PLIST_DST"
+  log "  ✓ Morning brief installed — runs daily at 08:30"
+  log "  Output: ~/claude-os/logs/briefs/YYYY-MM-DD.md"
+  log "  To change the time: edit launchd/com.claude-os.morning-brief.plist (Hour/Minute)"
+  log "  To disable: launchctl unload ~/Library/LaunchAgents/com.claude-os.morning-brief.plist"
+fi
+
+# ── 9. Summary ────────────────────────────────────────────────────────────────
 step "Install complete"
 echo ""
 log "claude-os is ready at: $REPO_DIR"
@@ -141,4 +165,4 @@ log "  2. Run ./sync.sh after any change to agents/skills/commands"
 log "  3. Run ./install.sh --rotate-secrets to update Keychain tokens"
 log "  4. Add $REPO_DIR/raycast to Raycast Script Commands (see above)"
 log ""
-log "Commands: /plan  /review  /remember  /brief  /draft-email  /capture  /task"
+log "Commands: /plan /review /remember /brief /draft-email /capture /task /write /adversarial-review"
