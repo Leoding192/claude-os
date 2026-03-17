@@ -27,21 +27,49 @@ cd ~/your-project && claude
 
 ```
 claude-os/
-├── install.sh                 ← fresh machine bootstrap
+├── install.sh                 ← fresh machine bootstrap (includes Raycast setup)
 ├── sync.sh                    ← sync config to ~/.claude/
 ├── CLAUDE.md                  ← project-level rules (loaded in claude-os sessions)
-├── .mcp.json                  ← MCP server config (GitHub, Feishu, Filesystem)
+├── .mcp.json                  ← MCP server config (GitHub, Feishu, Gmail, Filesystem)
 ├── .claude/
 │   ├── settings.json          ← hooks
-│   ├── agents/                ← planner / coder / reviewer / documenter
-│   ├── commands/              ← /plan  /review  /remember
+│   ├── agents/                ← planner / coder / reviewer / documenter / scheduler / mailer
+│   ├── commands/              ← /plan /review /remember /brief /draft-email /capture /task /undo-last /consolidate
 │   ├── skills/                ← review / debug / refactor workflows + codex
 │   └── hooks/                 ← (reserved for external hook scripts)
 ├── .agents/skills/codex/      ← OpenAI Codex skill (via npx skills add)
+├── raycast/                   ← Raycast script commands (add this dir in Raycast settings)
+│   ├── claude-brief.sh        ← "Claude Brief" — daily calendar + email summary
+│   ├── claude-capture.sh      ← "Claude Capture" — quick-capture with text input
+│   └── claude-ask.sh          ← "Claude Ask" — open Claude session in Terminal
+├── docs/                      ← system design specs
+│   ├── capability-registry.md
+│   ├── runtime-state-model.md
+│   ├── automation-risk-model.md
+│   ├── recovery-model.md
+│   └── memory-schema.md
 └── memory/
-    ├── session.md             ← injected every session (current work only)
-    └── decisions.md           ← long-term decisions & lessons
+    ├── session.md             ← L1: injected every session (≤50 lines)
+    ├── decisions.md           ← L3: long-term decisions & lessons
+    ├── projects/              ← L2: per-project context
+    ├── people/                ← L3: collaborator context
+    └── archive/               ← L4: archived stale entries (2yr retention)
 ```
+
+---
+
+## Entry Points
+
+| Entry | How | Best for |
+|---|---|---|
+| **Terminal** | `cd ~/claude-os && claude` | Deep work, coding, planning |
+| **Raycast** | `Cmd+Shift+B` → Brief, `Cmd+Shift+Space` → Capture | Quick actions without opening Terminal |
+| **Raycast "Claude Ask"** | Type a prompt in Raycast | One-off questions, opens Terminal |
+
+### Raycast Setup
+1. Open Raycast → Settings → Extensions → Script Commands
+2. Click `+` → Add Script Directory → select `~/claude-os/raycast`
+3. Assign shortcuts in Raycast for each command
 
 ---
 
@@ -52,6 +80,12 @@ claude-os/
 | `/plan <task>` | Decompose task → reviewable plan → implement on approval |
 | `/review [target]` | Code review with engine choice: Claude Code or Codex |
 | `/remember <thing>` | Persist a decision or lesson to `memory/decisions.md` |
+| `/brief [date]` | Daily brief: calendar events + email summary |
+| `/draft-email <desc>` | Draft an email with writing preferences applied |
+| `/capture "<text>"` | Quick-capture a thought or task into session memory |
+| `/task <intent>` | Start a state-tracked task with full PLANNING → EXECUTING lifecycle |
+| `/undo-last` | Undo the most recent Reversible-class action |
+| `/consolidate` | Archive stale L3 memory entries |
 
 ---
 
@@ -63,6 +97,8 @@ claude-os/
 | `coder` | Implements scoped tasks — only after a plan is approved |
 | `reviewer` | Structured code review with Critical / Major / Minor severity |
 | `documenter` | Writes and updates technical documentation |
+| `scheduler` | Reads and manages Apple Calendar via AppleScript |
+| `mailer` | Reads, drafts, and sends email via Gmail MCP |
 
 ---
 
@@ -108,7 +144,19 @@ After any addition: run `bash sync.sh`.
 
 ## Roadmap
 
-See [`docs/`](docs/) for the full system design spec (capability registry, runtime state model, recovery model, memory schema, metrics).
+See [`docs/`](docs/) for the full system design spec.
 
-Current layer: **Layer 1 — Sync & Portability** ✅
-Next: **Layer 2 — macOS System Integration** (Calendar, Mail, Notifications)
+| Layer | Status | Description |
+|---|---|---|
+| Layer 1 — Sync & Portability | ✅ | `install.sh`, `sync.sh`, README |
+| Capability Registry | ✅ | All capabilities catalogued with tier + reversibility |
+| Security & Governance | ✅ | Permission tiers, Keychain, audit log |
+| Runtime State Model | ✅ | PLANNING → EXECUTING → COMPLETED state machine |
+| Automation Risk Model | ✅ | Risk scoring + execution path selection |
+| Recovery Model | ✅ | Undo stack, post-incident protocol |
+| Memory Schema (L0–L4) | ✅ | Layered memory with write policy + `/consolidate` |
+| Layer 2 — macOS Integration | ✅ | Calendar (AppleScript), Gmail MCP, Notifications |
+| Unified Entry | ✅ | Raycast scripts + keyboard shortcuts |
+| Layer 3 — Communication | ⬜ | Feishu full integration |
+| Layer 4 — Proactive Execution | ⬜ | `/brief` auto-schedule, `/loop`, `/adversarial-review` |
+| Layer 5 — Knowledge System | ⬜ | `memory/projects/`, `memory/people/`, `/consolidate` active |

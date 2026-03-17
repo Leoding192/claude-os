@@ -106,7 +106,33 @@ else
   log "  ✓ $GLOBAL_SETTINGS exists (not modified)"
 fi
 
-# ── 7. Summary ────────────────────────────────────────────────────────────────
+# ── 7. Raycast scripts ────────────────────────────────────────────────────────
+step "Raycast integration"
+
+if command -v raycast &>/dev/null || [ -d "/Applications/Raycast.app" ]; then
+  log "  ✓ Raycast found"
+  log "  Raycast scripts are at: $REPO_DIR/raycast/"
+  log ""
+  log "  To activate:"
+  log "    1. Open Raycast → Settings → Extensions → Script Commands"
+  log "    2. Click '+' → Add Script Directory"
+  log "    3. Select: $REPO_DIR/raycast"
+  log "    4. The following commands will appear:"
+  log "         'Claude Brief'   — daily calendar + email summary"
+  log "         'Claude Capture' — quick-capture a thought (with text input)"
+  log "         'Claude Ask'     — open Claude session in Terminal"
+  log ""
+  log "  Recommended keyboard shortcuts (set in Raycast after adding scripts):"
+  log "         Cmd+Shift+B   → Claude Brief"
+  log "         Cmd+Shift+Space → Claude Capture"
+  log "         Cmd+Shift+A   → Claude Ask"
+else
+  warn "  Raycast not found — skipping"
+  log "  Install Raycast from https://www.raycast.com, then re-run this script"
+  log "  Scripts are ready at: $REPO_DIR/raycast/"
+fi
+
+# ── 8. Summary ────────────────────────────────────────────────────────────────
 step "Install complete"
 echo ""
 log "claude-os is ready at: $REPO_DIR"
@@ -115,5 +141,6 @@ log "Next steps:"
 log "  1. cd ~/your-project && claude    — start a session with full config"
 log "  2. Run ./sync.sh after any change to agents/skills/commands"
 log "  3. Run ./install.sh --rotate-secrets to update Keychain tokens"
+log "  4. Add $REPO_DIR/raycast to Raycast Script Commands (see above)"
 log ""
-log "Commands available everywhere: /plan  /review  /remember"
+log "Commands: /plan  /review  /remember  /brief  /draft-email  /capture  /task"
