@@ -39,6 +39,14 @@ else
   warn "No commands directory found — skipping"
 fi
 
+# ── Session state ─────────────────────────────────────────────────────────────
+SESSION="$REPO_DIR/memory/session.md"
+TEMPLATE="$REPO_DIR/memory/session.md.template"
+if [ ! -f "$SESSION" ] && [ -f "$TEMPLATE" ]; then
+  cp "$TEMPLATE" "$SESSION"
+  log "memory/session.md initialized from template"
+fi
+
 # ── Verify ────────────────────────────────────────────────────────────────────
 echo ""
 log "Sync complete. Current state:"
