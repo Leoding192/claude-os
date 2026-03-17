@@ -49,6 +49,10 @@
           {
             "type": "command",
             "command": "root=$(git -C \"${CLAUDE_PROJECT_DIR:-$PWD}\" rev-parse --show-toplevel 2>/dev/null || echo \"$HOME/claude-os\"); echo \"\"; echo \"Session ending. Update $root/memory/session.md with current work state if anything changed.\""
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json, os, datetime\ntask_file = os.path.expanduser('~/claude-os/logs/current-task.json')\ntasks_log = os.path.expanduser('~/claude-os/logs/tasks.jsonl')\nif not os.path.exists(task_file):\n    exit(0)\ntry:\n    with open(task_file) as f:\n        task = json.load(f)\n    task['final_state'] = 'CANCELLED'\n    task['completed_at'] = datetime.datetime.utcnow().isoformat() + 'Z'\n    task['result_summary'] = 'Session ended with task incomplete'\n    task['error'] = None\n    os.makedirs(os.path.dirname(tasks_log), exist_ok=True)\n    with open(tasks_log, 'a') as f:\n        f.write(json.dumps(task) + '\\n')\n    os.remove(task_file)\n    print('[claude-os] Incomplete task written to logs/tasks.jsonl as CANCELLED')\nexcept Exception as e:\n    print(f'[claude-os] warn: could not finalise task log: {e}')\n\" 2>/dev/null || true"
           }
         ]
       }

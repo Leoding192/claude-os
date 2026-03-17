@@ -53,6 +53,19 @@ claude-os/
 | `memory/session.md` | ✅ Every session | Current in-progress work, blockers, next steps |
 | `memory/decisions.md` | ❌ On demand | Settled decisions, lessons learned, patterns |
 
+## Orchestration Rules
+
+Before starting any multi-step task:
+1. Write `~/claude-os/logs/current-task.json` with state PLANNING (use `/task` command)
+2. Produce a plan, wait for user approval before changing state to EXECUTING
+3. Before any Confirm-tier capability: set state AWAITING_CONFIRMATION, surface the action, require explicit "yes"
+4. On completion: append to `logs/tasks.jsonl`, delete `current-task.json`
+5. On session end with incomplete task: Stop hook auto-writes CANCELLED to `tasks.jsonl`
+6. Never chain more than 3 tool calls without surfacing status to user
+7. On unrecoverable error: set state FAILED, surface clearly, do not retry silently
+
+See full spec: [docs/runtime-state-model.md](docs/runtime-state-model.md)
+
 ## Security & Governance
 
 ### Permission Tiers
