@@ -68,17 +68,6 @@ Implemented via AppleScript through the Bash tool. Calendar.app must be running.
 | `delete_calendar_event` | scheduler agent (osascript) | Confirm | Irreversible | explicit instruction only |
 | `update_calendar_event` | scheduler agent (osascript) | Confirm | Reversible (restore original) | natural language |
 
-### 163 Mail
-
-IMAP 读取 via mcp-imap；SMTP 发送 via mcp-imap 或 Bash (python3 smtplib fallback)。
-授权码存于 Keychain (`claude-os.mail163`)。
-
-| capability_id | agent / tool | tier | reversibility | valid entry points |
-|---|---|---|---|---|
-| `read_163_email` | mailer agent (mcp-imap) | Auto | — | /brief, natural language |
-| `search_163_email` | mailer agent (mcp-imap) | Auto | — | /brief, natural language |
-| `draft_163_email` | mailer agent | Auto | Reversible (discard draft) | /draft-email |
-| `send_163_email` | mailer agent (mcp-imap SMTP) | Confirm | Compensatable | explicit instruction only |
 
 ### Clipboard
 
@@ -116,4 +105,4 @@ Notifications via osascript (no MCP server needed).
 |---|---|
 | 2026-03-16 | Initial registry — Layer 0 + Layer 2–3 planned capabilities |
 | 2026-03-16 | Layer 2: Calendar (osascript), Notifications (osascript), Gmail (Claude.ai built-in) — implementation details added |
-| 2026-03-17 | Layer 3: Replaced Feishu with 163邮箱 (mcp-imap); added read_163_email, search_163_email, draft_163_email, send_163_email |
+| 2026-03-17 | Removed Feishu and 163邮箱; email integration is Gmail only (Claude.ai built-in) |

@@ -13,15 +13,14 @@ Generate Leo's daily brief: calendar events + email summary + optional prioritie
    - Flag conflicts (overlapping times)
    - Highlight events starting within the next 2 hours (if today)
 
-2. **Email** — invoke mailer agent (both accounts in parallel):
-   - Gmail: `gmail_search_messages` query `is:unread newer_than:1d`
-   - 163: mcp-imap `search_emails` folder=INBOX, unseen=true, since=yesterday
-   - Group combined: Action Required / FYI / Newsletters, label each `[Gmail]` / `[163]`
-   - Cap at 10 items total; show count for the rest
+2. **Email** — invoke mailer agent:
+   - `gmail_search_messages` query: `is:unread newer_than:1d`
+   - Group: Action Required / FYI / Newsletters
+   - Cap at 10 items; show count for the rest
 
 3. **Compose output** — combine both into the format below
 
-4. **Notify** (optional, if notification is appropriate):
+4. **Notify** (optional):
    ```bash
    osascript -e 'display notification "Brief ready" with title "Claude OS" subtitle "Check your terminal"'
    ```
@@ -40,7 +39,7 @@ Generate Leo's daily brief: calendar events + email summary + optional prioritie
   <HH:MM> – <HH:MM>  <Title>
   ⚠️  CONFLICT: <title A> overlaps <title B>
 
-📧 EMAIL  (Gmail: <N> unread  |  163: <N> unread)
+📧 EMAIL  (<N> unread)
 
   Action Required
     • <Sender> — <Subject>
@@ -58,7 +57,7 @@ If calendar is empty: "📅 No events scheduled."
 If inbox is clean: "📧 Inbox clear."
 
 ## Latency Target
-End-to-end < 15 seconds. If either source is slow, output the available data and note which is pending.
+End-to-end < 15 seconds. If either source is slow, output available data and note what's pending.
 
 ## Error Handling
 - Calendar unavailable → skip section, note "Calendar unavailable — is Calendar.app running?"

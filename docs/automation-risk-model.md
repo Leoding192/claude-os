@@ -64,8 +64,6 @@ These scores assume a typical invocation with unambiguous user intent (confidenc
 | `read_email` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
 | `search_email` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
 | `read_calendar` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
-| `read_163_email` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
-| `search_163_email` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
 | `read_clipboard` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
 | `read_env_var` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
 | `read_keychain` | 0.0 | 0.0 | 0.0 | 0.00 | Auto |
@@ -78,12 +76,10 @@ These scores assume a typical invocation with unambiguous user intent (confidenc
 | `write_clipboard` | 0.0 | 0.5 | 0.0 | 0.25 | Confirm (floor: Confirm) |
 | `create_calendar_event` | 0.5 | 0.5 | 1.0 | 0.45 | Confirm |
 | `update_calendar_event` | 0.5 | 0.5 | 1.0 | 0.45 | Confirm |
-| `draft_163_email` | 0.0 | 0.0 | 0.5 | 0.10 | Auto |
 | `write_keychain` | 0.5 | 0.5 | 0.0 | 0.25 | Confirm (floor: Confirm) |
 | `git_push` | 0.5 | 0.5 | 1.0 | 0.45 | Confirm |
 | `delete_file` | 1.0 | 0.5 | 0.0 | 0.50 | Confirm |
 | `send_email` | 1.0 | 1.0 | 1.0 | 0.70 | Confirm → Escalate if intent unclear |
-| `send_163_email` | 1.0 | 1.0 | 1.0 | 0.70 | Confirm → Escalate if intent unclear |
 | `delete_calendar_event` | 1.0 | 1.0 | 1.0 | 0.70 | Confirm → Escalate if intent unclear |
 | `git_reset_hard` | 1.0 | 1.0 | 0.0 | 0.50 | Confirm |
 | `git_push_main` | — | — | — | — | **Blocked** |

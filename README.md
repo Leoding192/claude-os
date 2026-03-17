@@ -30,7 +30,7 @@ claude-os/
 ├── install.sh                 ← fresh machine bootstrap (includes Raycast setup)
 ├── sync.sh                    ← sync config to ~/.claude/
 ├── CLAUDE.md                  ← project-level rules (loaded in claude-os sessions)
-├── .mcp.json                  ← MCP server config (GitHub, Gmail, 163邮箱, Filesystem)
+├── .mcp.json                  ← MCP server config (GitHub, Gmail, Filesystem)
 ├── .claude/
 │   ├── settings.json          ← hooks
 │   ├── agents/                ← planner / coder / reviewer / documenter / scheduler / mailer

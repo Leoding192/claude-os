@@ -92,9 +92,7 @@ store_secret() {
   log "  ✓ $label saved to Keychain"
 }
 
-store_secret "claude-os.github"   "GITHUB_PERSONAL_ACCESS_TOKEN" "GitHub PAT"
-store_secret "claude-os.mail163" "MAIL_163_ADDRESS"             "163 邮箱地址 (如 yourname@163.com)"
-store_secret "claude-os.mail163" "MAIL_163_APP_PASSWORD"        "163 授权码 (非登录密码，在邮箱设置→IMAP→授权码生成)"
+store_secret "claude-os.github" "GITHUB_PERSONAL_ACCESS_TOKEN" "GitHub PAT"
 
 # ── 6. ~/.claude/settings.json ────────────────────────────────────────────────
 step "Global settings"

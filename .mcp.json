@@ -21,22 +21,6 @@
       }
     },
 
-    "mail-163": {
-      "_comment": [
-        "163 邮箱 MCP — IMAP 读取 + SMTP 发送，基于 mcp-imap 社区服务器。",
-        "Provides: 读取收件箱、搜索邮件、读邮件正文、发送邮件。",
-        "Setup:",
-        "  1. 登录 163 邮箱 → 设置 → POP3/SMTP/IMAP → 开启 IMAP 服务",
-        "  2. 在同一页面生成「授权码」（不是登录密码）",
-        "  3. 运行 install.sh 将授权码存入 Keychain",
-        "163 IMAP: imap.163.com:993 (SSL)",
-        "163 SMTP: smtp.163.com:465  (SSL)",
-        "Package: npx mcp-imap (community — https://github.com/modelcontextprotocol/servers)"
-      ],
-      "_implementation": "No MCP server needed — uses scripts/mail163.py via Bash tool.",
-      "_status": "active — credentials in Keychain (claude-os.mail163)"
-    },
-
     "gmail": {
       "_comment": [
         "Gmail MCP — provided by Claude.ai's built-in Gmail integration.",
