@@ -21,22 +21,31 @@
       }
     },
 
-    "feishu": {
+    "mail-163": {
       "_comment": [
-        "Feishu (Lark) MCP server — community-maintained.",
-        "Provides: read/send messages, manage docs, calendar, and bitable (sheets).",
+        "163 邮箱 MCP — IMAP 读取 + SMTP 发送，基于 mcp-imap 社区服务器。",
+        "Provides: 读取收件箱、搜索邮件、读邮件正文、发送邮件。",
         "Setup:",
-        "  1. Create a Feishu app at https://open.feishu.cn/app",
-        "  2. Enable the APIs you need under 'Permissions & Scopes'",
-        "  3. Set FEISHU_APP_ID and FEISHU_APP_SECRET in your environment.",
-        "     For user-level access also set FEISHU_USER_ACCESS_TOKEN.",
-        "Docs: https://github.com/larksuite/mcp-server-lark"
+        "  1. 登录 163 邮箱 → 设置 → POP3/SMTP/IMAP → 开启 IMAP 服务",
+        "  2. 在同一页面生成「授权码」（不是登录密码）",
+        "  3. 运行 install.sh 将授权码存入 Keychain",
+        "163 IMAP: imap.163.com:993 (SSL)",
+        "163 SMTP: smtp.163.com:465  (SSL)",
+        "Package: npx mcp-imap (community — https://github.com/modelcontextprotocol/servers)"
       ],
       "command": "npx",
-      "args": ["-y", "mcp-server-lark"],
+      "args": ["-y", "mcp-imap"],
       "env": {
-        "FEISHU_APP_ID": "${FEISHU_APP_ID}",
-        "FEISHU_APP_SECRET": "${FEISHU_APP_SECRET}"
+        "IMAP_HOST": "imap.163.com",
+        "IMAP_PORT": "993",
+        "IMAP_TLS": "true",
+        "IMAP_USER": "${MAIL_163_ADDRESS}",
+        "IMAP_PASSWORD": "${MAIL_163_APP_PASSWORD}",
+        "SMTP_HOST": "smtp.163.com",
+        "SMTP_PORT": "465",
+        "SMTP_TLS": "true",
+        "SMTP_USER": "${MAIL_163_ADDRESS}",
+        "SMTP_PASSWORD": "${MAIL_163_APP_PASSWORD}"
       }
     },
 

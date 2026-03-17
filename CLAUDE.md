@@ -101,7 +101,7 @@ See full spec: [docs/automation-risk-model.md](docs/automation-risk-model.md)
 | Tier | Examples | Behaviour |
 |---|---|---|
 | **Auto** | Read files, read email, search, git read, run codex | Execute silently |
-| **Confirm** | Write/delete files, send email, send Feishu message, git push, modify calendar | Show action summary → require explicit "yes" |
+| **Confirm** | Write/delete files, send email (Gmail/163), git push, modify calendar | Show action summary → require explicit "yes" |
 | **Blocked** | Push to main, touch .env/secrets, write prod config | Hard block, never execute |
 
 All capabilities are catalogued in [docs/capability-registry.md](docs/capability-registry.md).

@@ -11,6 +11,7 @@ Examples:
 ## Steps
 
 1. **Gather context** — if the description is ambiguous, ask for:
+   - **Account**: Gmail or 163邮箱 (infer from context if obvious, e.g. recipient is Chinese → 163)
    - Recipient (name + email if not obvious)
    - Purpose / key points to cover
    - Tone (if not inferable from context)

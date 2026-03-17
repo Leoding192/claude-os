@@ -13,10 +13,11 @@ Generate Leo's daily brief: calendar events + email summary + optional prioritie
    - Flag conflicts (overlapping times)
    - Highlight events starting within the next 2 hours (if today)
 
-2. **Email** — invoke mailer agent:
-   - `gmail_search_messages` query: `is:unread newer_than:1d`
-   - Group: Action Required / FYI / Newsletters
-   - Cap at 10 items; show count for the rest
+2. **Email** — invoke mailer agent (both accounts in parallel):
+   - Gmail: `gmail_search_messages` query `is:unread newer_than:1d`
+   - 163: mcp-imap `search_emails` folder=INBOX, unseen=true, since=yesterday
+   - Group combined: Action Required / FYI / Newsletters, label each `[Gmail]` / `[163]`
+   - Cap at 10 items total; show count for the rest
 
 3. **Compose output** — combine both into the format below
 
@@ -39,7 +40,7 @@ Generate Leo's daily brief: calendar events + email summary + optional prioritie
   <HH:MM> – <HH:MM>  <Title>
   ⚠️  CONFLICT: <title A> overlaps <title B>
 
-📧 EMAIL  (<N> unread)
+📧 EMAIL  (Gmail: <N> unread  |  163: <N> unread)
 
   Action Required
     • <Sender> — <Subject>
