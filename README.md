@@ -124,7 +124,7 @@ bash install.sh --rotate-secrets # re-enter any token
 
 Services stored:
 - `claude-os.github` → `GITHUB_PERSONAL_ACCESS_TOKEN`
-- `claude-os.feishu` → `FEISHU_APP_ID`, `FEISHU_APP_SECRET`
+
 
 ---
 

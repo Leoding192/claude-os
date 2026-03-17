@@ -45,7 +45,6 @@ Maintained in-session for **Reversible**-class actions only.
 | `git_commit` | `git reset HEAD~1 --soft` (unstage, keep working tree) |
 | `create_calendar_event` | Delete the created event via Calendar MCP |
 | `update_calendar_event` | Restore original values via Calendar MCP |
-| `create_feishu_doc` | Delete the created doc via Feishu MCP |
 | `write_clipboard` | Restore prior clipboard content (if captured before write) |
 | `write_keychain` | Delete the added Keychain entry |
 | `draft_email` | Delete the draft via Gmail MCP |
@@ -65,8 +64,6 @@ When a Compensatable or Irreversible action completes unexpectedly:
 | capability_id | Compensatory action |
 |---|---|
 | `send_email` | Draft and send a follow-up or correction email |
-| `send_feishu_message` | Send a correction message to the same recipient |
-| `write_feishu_doc` | Notify collaborators of the unintended change |
 | `git_push` | Ask user whether to `git revert` or force-push correction branch |
 | `delete_calendar_event` | Re-create the event manually with original details if known |
 
