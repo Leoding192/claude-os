@@ -1,5 +1,9 @@
-# Codex runtime output
+# Agent skill runtime outputs
 .agents/skills/codex/.runtime/
+.agents/skills/docx/.runtime/
+.agents/skills/pdf/.runtime/
+.agents/skills/pptx/.runtime/
+.agents/skills/xlsx/.runtime/
 
 # Audit logs (generated at runtime)
 logs/*.jsonl

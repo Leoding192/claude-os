@@ -18,7 +18,11 @@ claude-os/
 │   └── skills/                ← symlinks into .agents/skills/
 ├── .agents/
 │   └── skills/
-│       └── codex/             ← Codex CLI skill (via `npx skills add`)
+│       ├── codex/             ← Codex CLI skill (via `npx skills add`)
+│       ├── docx/              ← Word document skill (anthropics/skills)
+│       ├── pdf/               ← PDF skill (anthropics/skills)
+│       ├── pptx/              ← PowerPoint skill (anthropics/skills)
+│       └── xlsx/              ← Excel skill (anthropics/skills)
 └── memory/
     ├── session.md             ← injected every session (current work only)
     └── decisions.md          ← long-term decisions & lessons (read on demand)
