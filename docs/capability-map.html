@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude OS Capability Map</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --card: #161b22;
+      --border: rgba(240, 246, 252, 0.1);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      --commands: #58a6ff;
+      --skills: #3fb950;
+      --agents: #bc8cff;
+      --mcp: #f0883e;
+      --hooks: #8b949e;
+      --raycast: #39d353;
+      --memory: #e3b341;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(88, 166, 255, 0.08), transparent 26%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      background: rgba(13, 17, 23, 0.9);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-inner,
+    main {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .nav-links a {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      transition: 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      border-color: rgba(201, 209, 217, 0.28);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .hero {
+      padding: 52px 0 28px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.05;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      padding: 20px 0 48px;
+    }
+
+    .section-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 100%), var(--card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      min-height: 100%;
+    }
+
+    .section-card h2 {
+      margin: 0 0 6px;
+      font-size: 1.25rem;
+      color: var(--accent);
+    }
+
+    .section-card .section-note {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .item {
+      padding-top: 14px;
+      margin-top: 14px;
+      border-top: 1px solid rgba(240, 246, 252, 0.08);
+    }
+
+    .item:first-of-type {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .item-name {
+      margin: 0 0 6px;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    .item p {
+      margin: 0 0 10px;
+      color: var(--text);
+      font-size: 0.96rem;
+    }
+
+    code {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: rgba(240, 246, 252, 0.06);
+      border: 1px solid rgba(240, 246, 252, 0.08);
+      color: #f0f6fc;
+      font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .commands { --accent: var(--commands); }
+    .skills { --accent: var(--skills); }
+    .agents { --accent: var(--agents); }
+    .mcp { --accent: var(--mcp); }
+    .hooks { --accent: var(--hooks); }
+    .raycast { --accent: var(--raycast); }
+    .memory { --accent: var(--memory); }
+
+    @media (max-width: 720px) {
+      .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding-top: 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Claude OS Capability Map</div>
+      <nav class="nav-links" aria-label="Section navigation">
+        <a href="#commands">Commands</a>
+        <a href="#skills">Skills</a>
+        <a href="#agents">Agents</a>
+        <a href="#mcp">MCP Servers</a>
+        <a href="#hooks">Hooks</a>
+        <a href="#raycast">Raycast</a>
+        <a href="#memory">Memory</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Claude OS Capability Map</h1>
+      <p>All capabilities and how to invoke them in a new session.</p>
+    </section>
+
+    <section class="grid" aria-label="Capability sections">
+      <article class="section-card commands" id="commands">
+        <h2>Section 1 Commands</h2>
+        <p class="section-note">Direct commands for planning, execution, review, communication, and memory operations.</p>
+
+        <div class="item">
+          <div class="item-name">/plan &lt;task&gt;</div>
+          <p>Decompose task into structured plan.</p>
+          <code>/plan fix the auth bug</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/write &lt;topic&gt;</div>
+          <p>Writing pipeline: draft to Codex blind review to revised output.</p>
+          <code>/write essay about AI design</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/task &lt;intent&gt;</div>
+          <p>Start state-tracked task (PLANNING to EXECUTING to COMPLETED).</p>
+          <code>/task refactor the API layer</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/review [target]</div>
+          <p>Code review: choose Claude or Codex engine.</p>
+          <code>/review or /review src/api.ts</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/brief [date]</div>
+          <p>Daily brief: calendar events + email summary.</p>
+          <code>/brief or /brief 2026-03-18</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/capture text</div>
+          <p>Quick-capture thought/task into session memory.</p>
+          <code>/capture fix the login bug later</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/remember thing</div>
+          <p>Persist decision or lesson to long-term memory.</p>
+          <code>/remember always use zod for validation</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/draft-email desc</div>
+          <p>Draft email with writing preferences applied.</p>
+          <code>/draft-email follow up with team on Q2</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/adversarial-review [target]</div>
+          <p>Dual-engine review: Claude + Codex side-by-side.</p>
+          <code>/adversarial-review</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/undo-last</div>
+          <p>Undo the most recent Reversible-class action.</p>
+          <code>/undo-last</code>
+        </div>
+        <div class="item">
+          <div class="item-name">/consolidate</div>
+          <p>Archive stale L3 memory entries.</p>
+          <code>/consolidate</code>
+        </div>
+      </article>
+
+      <article class="section-card skills" id="skills">
+        <h2>Section 2 Skills</h2>
+        <p class="section-note">Reusable workflows triggered by natural-language requests or direct command usage.</p>
+
+        <div class="item">
+          <div class="item-name">debug</div>
+          <p>Systematic debugging: reproduce, isolate, fix root cause.</p>
+          <code>trigger: debug this, whats wrong with X</code>
+        </div>
+        <div class="item">
+          <div class="item-name">refactor</div>
+          <p>Restructure code for clarity without changing behavior.</p>
+          <code>trigger: refactor this, clean up</code>
+        </div>
+        <div class="item">
+          <div class="item-name">review</div>
+          <p>Structured code review workflow.</p>
+          <code>trigger: review this code</code>
+        </div>
+        <div class="item">
+          <div class="item-name">brief</div>
+          <p>Daily brief: calendar + email.</p>
+          <code>trigger: /brief or auto via launchd at 08:30</code>
+        </div>
+        <div class="item">
+          <div class="item-name">docx</div>
+          <p>Read/write/edit Word documents.</p>
+          <code>trigger: create a Word doc, edit this .docx</code>
+        </div>
+        <div class="item">
+          <div class="item-name">pdf</div>
+          <p>Read, fill forms, annotate PDFs.</p>
+          <code>trigger: read this PDF, fill the form</code>
+        </div>
+        <div class="item">
+          <div class="item-name">pptx</div>
+          <p>Create and edit PowerPoint presentations.</p>
+          <code>trigger: make a PPT, create slides</code>
+        </div>
+        <div class="item">
+          <div class="item-name">xlsx</div>
+          <p>Read/write/recalculate Excel spreadsheets.</p>
+          <code>trigger: create a spreadsheet, edit Excel</code>
+        </div>
+      </article>
+
+      <article class="section-card agents" id="agents">
+        <h2>Section 3 Agents</h2>
+        <p class="section-note">Focused roles that activate based on task complexity, scope, and workflow state.</p>
+
+        <div class="item">
+          <div class="item-name">planner</div>
+          <p>Decomposes complex tasks into executable plans.</p>
+          <code>trigger: 3+ steps, architectural decisions</code>
+        </div>
+        <div class="item">
+          <div class="item-name">coder</div>
+          <p>Implements scoped tasks only after plan approved.</p>
+          <code>trigger: plan exists, scope locked</code>
+        </div>
+        <div class="item">
+          <div class="item-name">reviewer</div>
+          <p>Code review: correctness, security, style.</p>
+          <code>trigger: /review, /adversarial-review</code>
+        </div>
+        <div class="item">
+          <div class="item-name">documenter</div>
+          <p>Writes and updates technical documentation.</p>
+          <code>trigger: document this, docs missing</code>
+        </div>
+        <div class="item">
+          <div class="item-name">mailer</div>
+          <p>Gmail: read, search, draft, send emails.</p>
+          <code>trigger: email, draft, reply, inbox</code>
+        </div>
+        <div class="item">
+          <div class="item-name">scheduler</div>
+          <p>Apple Calendar: read events, create reminders.</p>
+          <code>trigger: calendar, meeting, reminder, agenda</code>
+        </div>
+      </article>
+
+      <article class="section-card mcp" id="mcp">
+        <h2>Section 4 MCP Servers</h2>
+        <p class="section-note">Tool backends that provide repo, mail, calendar, notification, and filesystem integration.</p>
+
+        <div class="item">
+          <div class="item-name">github</div>
+          <p>Repos, issues, PRs, code search.</p>
+          <code>tools: search_repositories, create_issue, get_file_contents</code>
+        </div>
+        <div class="item">
+          <div class="item-name">gmail</div>
+          <p>Search, read threads, create drafts.</p>
+          <code>tools: gmail_search_messages, gmail_read_message, gmail_create_draft</code>
+        </div>
+        <div class="item">
+          <div class="item-name">apple-calendar</div>
+          <p>Read/create/update calendar events.</p>
+          <code>via: osascript AppleScript</code>
+        </div>
+        <div class="item">
+          <div class="item-name">notifications</div>
+          <p>Send macOS system notifications.</p>
+          <code>via: osascript display notification</code>
+        </div>
+        <div class="item">
+          <div class="item-name">filesystem</div>
+          <p>Read/write local files.</p>
+          <code>scope: ~/claude-os and ~/projects</code>
+        </div>
+      </article>
+
+      <article class="section-card hooks" id="hooks">
+        <h2>Section 5 Hooks</h2>
+        <p class="section-note">Auto-execute behaviors with no manual invocation required.</p>
+
+        <div class="item">
+          <div class="item-name">PreToolUse</div>
+          <p>Block any edit on main/master branch.</p>
+          <code>auto-execute, no manual invocation</code>
+        </div>
+        <div class="item">
+          <div class="item-name">PostToolUse format</div>
+          <p>Auto-format files: prettier / black / gofmt / shfmt.</p>
+          <code>auto-execute, no manual invocation</code>
+        </div>
+        <div class="item">
+          <div class="item-name">PostToolUse audit</div>
+          <p>Log Confirm-tier Bash ops to logs/audit.jsonl.</p>
+          <code>auto-execute, no manual invocation</code>
+        </div>
+        <div class="item">
+          <div class="item-name">UserPromptSubmit</div>
+          <p>Inject memory/session.md at every session start.</p>
+          <code>auto-execute, no manual invocation</code>
+        </div>
+        <div class="item">
+          <div class="item-name">Stop</div>
+          <p>Auto-clear session.md, carry forward incomplete tasks.</p>
+          <code>auto-execute, no manual invocation</code>
+        </div>
+      </article>
+
+      <article class="section-card raycast" id="raycast">
+        <h2>Section 6 Raycast</h2>
+        <p class="section-note">Quick-launch entry points for briefings, capture, and new terminal sessions.</p>
+
+        <div class="item">
+          <div class="item-name">Claude Brief</div>
+          <p>Runs /brief, shows output in Raycast.</p>
+          <code>Cmd+Shift+B</code>
+        </div>
+        <div class="item">
+          <div class="item-name">Claude Capture</div>
+          <p>Quick-capture with text input field.</p>
+          <code>Cmd+Shift+Space</code>
+        </div>
+        <div class="item">
+          <div class="item-name">Claude Ask</div>
+          <p>Opens new Claude session in Terminal.</p>
+          <code>Cmd+Shift+A</code>
+        </div>
+      </article>
+
+      <article class="section-card memory" id="memory">
+        <h2>Section 7 Memory</h2>
+        <p class="section-note">Layered memory model spanning session context, project context, durable knowledge, and archives.</p>
+
+        <div class="item">
+          <div class="item-name">L1 memory/session.md</div>
+          <p>Auto-injected every session, limit 50 lines.</p>
+          <code>write: /capture or natural language</code>
+        </div>
+        <div class="item">
+          <div class="item-name">L2 memory/projects/name.md</div>
+          <p>Per-project decisions, on demand.</p>
+          <code>write: /remember</code>
+        </div>
+        <div class="item">
+          <div class="item-name">L3 decisions.md, people/, writing.md</div>
+          <p>Durable knowledge, on demand.</p>
+          <code>write: /remember</code>
+        </div>
+        <div class="item">
+          <div class="item-name">L4 memory/archive/YYYY-MM/</div>
+          <p>Archived stale entries, never auto-injected.</p>
+          <code>write: /consolidate</code>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
