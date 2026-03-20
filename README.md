@@ -33,7 +33,7 @@ claude-os/
 ├── .mcp.json                  ← MCP server config (GitHub, Gmail, Filesystem)
 ├── .claude/
 │   ├── settings.json          ← hooks
-│   ├── agents/                ← planner / coder / reviewer / documenter / scheduler / mailer
+│   ├── agents/                ← task-planner / impl-coder / code-reviewer / doc-writer / cal-manager / mail-writer
 │   ├── commands/              ← /plan /review /remember /brief /draft-email /capture /task /undo-last /consolidate
 │   ├── skills/                ← review / debug / refactor workflows + codex
 │   └── hooks/                 ← (reserved for external hook scripts)
@@ -93,12 +93,12 @@ claude-os/
 
 | Agent | Role |
 |---|---|
-| `planner` | Decomposes complex tasks into executable, checkable plans |
-| `coder` | Implements scoped tasks — only after a plan is approved |
-| `reviewer` | Structured code review with Critical / Major / Minor severity |
-| `documenter` | Writes and updates technical documentation |
-| `scheduler` | Reads and manages Apple Calendar via AppleScript |
-| `mailer` | Reads, drafts, and sends email via Gmail MCP |
+| `task-planner` | Decomposes complex tasks into executable, checkable plans |
+| `impl-coder` | Implements scoped tasks — only after a plan is approved |
+| `code-reviewer` | Structured code review with Critical / Major / Minor severity |
+| `doc-writer` | Writes and updates technical documentation |
+| `cal-manager` | Reads and manages Apple Calendar via AppleScript |
+| `mail-writer` | Reads, drafts, and sends email via Gmail MCP |
 
 ---
 

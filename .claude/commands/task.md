@@ -12,7 +12,7 @@ Start a tracked task with full state management.
 {
   "task_id": "<generated>",
   "intent": "$ARGUMENTS",
-  "agent": "planner",
+  "agent": "task-planner",
   "capability_ids": [],
   "risk_score": 0.0,
   "state": "PLANNING",
@@ -24,7 +24,7 @@ Start a tracked task with full state management.
 }
 ```
 
-3. Invoke the planner agent to decompose the intent into steps.
+3. Invoke the task-planner agent to decompose the intent into steps.
    - Count the steps and update `steps_total` in current-task.json
    - Present the plan to the user and wait for approval
 

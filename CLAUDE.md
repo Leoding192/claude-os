@@ -12,7 +12,7 @@ claude-os/
 ├── .gitignore
 ├── .claude/
 │   ├── settings.json          ← hooks
-│   ├── agents/                ← planner / coder / reviewer / documenter
+│   ├── agents/                ← task-planner / impl-coder / code-reviewer / doc-writer / cal-manager / mail-writer
 │   ├── commands/              ← slash commands: /plan /review /remember
 │   ├── hooks/                 ← external hook scripts (future)
 │   └── skills/                ← symlinks into .agents/skills/
@@ -31,12 +31,12 @@ claude-os/
 ## Agents
 | Agent | Invoke when |
 |---|---|
-| `planner` | 3+ steps, arch impact, unclear scope |
-| `coder` | Plan approved, scope locked |
-| `reviewer` | Before merging |
-| `documenter` | Docs missing or outdated |
-| `scheduler` | Calendar, events, reminders, today's agenda |
-| `mailer` | Email — read, draft, reply, send |
+| `task-planner` | 3+ steps, arch impact, unclear scope |
+| `impl-coder` | Plan approved, scope locked |
+| `code-reviewer` | Before merging |
+| `doc-writer` | Docs missing or outdated |
+| `cal-manager` | Calendar, events, reminders, today's agenda |
+| `mail-writer` | Email — read, draft, reply, send |
 
 ## Hooks (settings.json)
 | Event | Matcher | Behavior |

@@ -1,6 +1,9 @@
 ---
-name: coder
+name: impl-coder
 description: Use this agent to implement a specific, well-scoped task. Invoke after a plan exists and the goal, scope, and constraints are clear. This agent writes code — it does not plan or review.
+tools: Read, Write, Edit, Bash, Grep, Glob
+model: sonnet
+memory: user
 ---
 
 # Coder Agent

@@ -39,6 +39,43 @@ else
   warn "No commands directory found — skipping"
 fi
 
+# ── Settings (hooks) — merge into ~/.claude/settings.json ────────────────────
+# Strategy: take the "hooks" key from repo settings.json and merge it into the
+# global ~/.claude/settings.json, preserving all other keys (mcpServers, etc.)
+REPO_SETTINGS="$REPO_DIR/.claude/settings.json"
+GLOBAL_SETTINGS="$CLAUDE_DIR/settings.json"
+if [ -f "$REPO_SETTINGS" ]; then
+  python3 - "$REPO_SETTINGS" "$GLOBAL_SETTINGS" <<'PYEOF'
+import json, os, sys
+
+repo    = sys.argv[1]
+global_ = sys.argv[2]
+
+with open(repo) as f:
+    repo_cfg = json.load(f)
+
+# Load existing global config (if any)
+if os.path.exists(global_):
+    with open(global_) as f:
+        global_cfg = json.load(f)
+else:
+    global_cfg = {}
+
+# Merge: repo hooks overwrite, all other global keys are preserved
+if "hooks" in repo_cfg:
+    global_cfg["hooks"] = repo_cfg["hooks"]
+
+with open(global_, "w") as f:
+    json.dump(global_cfg, f, indent=2)
+    f.write("\n")
+
+print(f"[sync] settings hooks → {global_}")
+PYEOF
+  log "settings.json hooks merged into $GLOBAL_SETTINGS"
+else
+  warn "No settings.json found in repo — skipping hook sync"
+fi
+
 # ── Session state ─────────────────────────────────────────────────────────────
 SESSION="$REPO_DIR/memory/session.md"
 TEMPLATE="$REPO_DIR/memory/session.md.template"

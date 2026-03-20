@@ -21,7 +21,7 @@ IDLE
   │
   ▼
 PLANNING ─────────────────────────────────────────── CANCELLED
-  │  (planner produces step list, user approves)          ▲
+  │  (task-planner produces step list, user approves)      ▲
   ▼                                                       │
 EXECUTING ──► AWAITING_CONFIRMATION ──► (user rejects) ──┘
   │                  │

@@ -1,4 +1,4 @@
-Draft an email using the mailer agent, with Leo's writing preferences applied.
+Draft an email using the mail-writer agent, with Leo's writing preferences applied.
 
 ## Usage
 /draft-email [brief description]

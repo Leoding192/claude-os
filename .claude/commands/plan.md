@@ -1,6 +1,6 @@
-Invoke the planner agent to decompose the current task into an executable plan.
+Invoke the task-planner agent to decompose the current task into an executable plan.
 
-Use the planner agent. The task to plan is: $ARGUMENTS
+Use the task-planner agent. The task to plan is: $ARGUMENTS
 
 Follow the planner output format exactly:
 - Goal (one sentence)

@@ -1,6 +1,9 @@
 ---
-name: documenter
+name: doc-writer
 description: Use this agent to write or update documentation for code, APIs, systems, or decisions. Invoke when existing docs are missing, outdated, or unclear — not to annotate every function, but to explain what matters.
+tools: Read, Write, Edit, Grep, Glob
+model: sonnet
+memory: user
 ---
 
 # Documenter Agent

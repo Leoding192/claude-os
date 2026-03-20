@@ -5,16 +5,14 @@
 .agents/skills/pptx/.runtime/
 .agents/skills/xlsx/.runtime/
 
-# Audit logs (generated at runtime)
-logs/*.jsonl
+# All runtime logs (generated at runtime)
+logs/
 
 # Session state (runtime-rewritten; template is memory/session.md.template)
 memory/session.md
 
-# Morning brief outputs (generated at runtime)
-logs/briefs/
-logs/launchd-brief.log
-logs/launchd-brief-err.log
+# Secrets
+*.secret
 
 # OS
 .DS_Store

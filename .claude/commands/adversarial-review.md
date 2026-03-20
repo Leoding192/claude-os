@@ -1,4 +1,4 @@
-Dual-engine code review: Claude reviewer agent + Codex, side-by-side with agreement/disagreement analysis.
+Dual-engine code review: Claude code-reviewer agent + Codex, side-by-side with agreement/disagreement analysis.
 
 ## Usage
 /adversarial-review [target]
@@ -18,10 +18,10 @@ Dual-engine code review: Claude reviewer agent + Codex, side-by-side with agreem
    ```bash
    git diff HEAD | wc -l
    ```
-   - If < 20 lines → run Claude reviewer only, append note: "Diff too small for dual-engine (<20 lines). Running Claude only."
+   - If < 20 lines → run Claude code-reviewer only, append note: "Diff too small for dual-engine (<20 lines). Running Claude only."
    - If ≥ 20 lines → proceed with dual-engine
 
-3. **Claude review** — invoke the reviewer agent on the diff. Capture full output as CLAUDE_REVIEW.
+3. **Claude review** — invoke the code-reviewer agent on the diff. Capture full output as CLAUDE_REVIEW.
 
 4. **Codex review** — run Codex independently (blind — do not show CLAUDE_REVIEW to Codex):
    ```bash

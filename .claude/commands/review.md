@@ -7,12 +7,12 @@ Review code changes using a selected engine.
    - Otherwise, run `git diff HEAD` to get uncommitted changes
    - If the diff is empty, respond: "没有未提交的变更，没有可以审查的内容。" and stop.
 
-2. Ask the user: "用哪个引擎审查？\n- **Claude Code** — 用 reviewer agent 直接审查\n- **Codex** — 调用 Codex 独立审查（更客观，消耗 OpenAI token）"
+2. Ask the user: "用哪个引擎审查？\n- **Claude Code** — 用 code-reviewer agent 直接审查\n- **Codex** — 调用 Codex 独立审查（更客观，消耗 OpenAI token）"
 
 3. Wait for the user's choice, then execute:
 
    **If Claude Code:**
-   Use the reviewer agent. Review the target thoroughly and produce the output format below.
+   Use the code-reviewer agent. Review the target thoroughly and produce the output format below.
 
    **If Codex:**
    Run the following command and read the output file:

@@ -93,7 +93,7 @@ Collaborator context. One file per person. Format:
 
 ### `memory/writing.md`
 
-Leo's writing preferences and style guidelines. Used by the `mailer` agent and any writing tasks.
+Leo's writing preferences and style guidelines. Used by the `mail-writer` agent and any writing tasks.
 
 ---
 

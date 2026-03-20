@@ -54,8 +54,8 @@ Each entry defines tier, reversibility class, and valid entry points.
 |---|---|---|---|---|
 | `read_email` | Gmail MCP | Auto | — | /brief, natural language |
 | `search_email` | Gmail MCP | Auto | — | /brief, natural language |
-| `draft_email` | Gmail MCP (mailer agent) | Auto | Reversible (delete draft) | /draft-email |
-| `send_email` | Gmail MCP (mailer agent) | Confirm | Compensatable | explicit instruction only |
+| `draft_email` | Gmail MCP (mail-writer agent) | Auto | Reversible (delete draft) | /draft-email |
+| `send_email` | Gmail MCP (mail-writer agent) | Confirm | Compensatable | explicit instruction only |
 
 ### Calendar
 
@@ -63,10 +63,10 @@ Implemented via AppleScript through the Bash tool. Calendar.app must be running.
 
 | capability_id | agent / tool | tier | reversibility | valid entry points |
 |---|---|---|---|---|
-| `read_calendar` | scheduler agent (osascript) | Auto | — | /brief, natural language |
-| `create_calendar_event` | scheduler agent (osascript) | Confirm | Reversible (delete event) | natural language |
-| `delete_calendar_event` | scheduler agent (osascript) | Confirm | Irreversible | explicit instruction only |
-| `update_calendar_event` | scheduler agent (osascript) | Confirm | Reversible (restore original) | natural language |
+| `read_calendar` | cal-manager agent (osascript) | Auto | — | /brief, natural language |
+| `create_calendar_event` | cal-manager agent (osascript) | Confirm | Reversible (delete event) | natural language |
+| `delete_calendar_event` | cal-manager agent (osascript) | Confirm | Irreversible | explicit instruction only |
+| `update_calendar_event` | cal-manager agent (osascript) | Confirm | Reversible (restore original) | natural language |
 
 
 ### Clipboard
@@ -105,7 +105,7 @@ Notifications via osascript (no MCP server needed).
 |---|---|---|---|---|
 | `schedule_morning_brief` | install.sh (launchd) | Auto | Reversible (launchctl unload) | install.sh |
 | `run_morning_brief` | scripts/morning-brief.sh | Auto | — | launchd / manual |
-| `adversarial_review` | reviewer agent + Codex | Auto | — | /adversarial-review |
+| `adversarial_review` | code-reviewer agent + Codex | Auto | — | /adversarial-review |
 | `write_pipeline` | Claude + Codex | Auto | — | /write |
 
 ---

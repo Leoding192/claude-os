@@ -8,12 +8,12 @@ Generate Leo's daily brief: calendar events + email summary + optional prioritie
 
 ## Steps
 
-1. **Calendar** — invoke scheduler agent:
+1. **Calendar** — invoke cal-manager agent:
    - Read all events for the target date
    - Flag conflicts (overlapping times)
    - Highlight events starting within the next 2 hours (if today)
 
-2. **Email** — invoke mailer agent:
+2. **Email** — invoke mail-writer agent:
    - `gmail_search_messages` query: `is:unread newer_than:1d`
    - Group: Action Required / FYI / Newsletters
    - Cap at 10 items; show count for the rest
