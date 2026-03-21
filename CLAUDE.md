@@ -123,3 +123,13 @@ Format: `{ timestamp, tool, action, result, confirmed_by_user }`
 - New skill → `npx skills add <repo>`
 - New MCP → `.mcp.json`
 - New capability → `docs/capability-registry.md` (register before implementing)
+
+---
+
+## Agent 调用规则
+- 日程管理：使用 cal-manager agent，不要用内置 scheduler
+- 邮件操作：使用 mail-writer agent，不要用内置 mailer
+- 资讯搜索：使用 news-curator agent（Phase 3 添加）
+- 对话总结：使用 session-summarizer agent（Phase 3 添加）
+- 技术调研：使用 research-analyst agent（Phase 3 添加）
+- 学习辅导：使用 learn-tutor agent（Phase 3 添加）
