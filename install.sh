@@ -172,7 +172,11 @@ echo "=== External Dependencies ==="
 echo "Installing Codex..."
 npm install -g @openai/codex 2>/dev/null || echo "  → Codex: install manually with npm install -g @openai/codex"
 echo ""
+echo "Installing Claude plugins..."
+claude plugins marketplace add thedotmack/claude-mem 2>/dev/null || true
+claude plugins install claude-mem 2>/dev/null || echo "  → claude-mem: install manually with: claude plugins marketplace add thedotmack/claude-mem && claude plugins install claude-mem"
+claude plugins marketplace add jarrodwatts/claude-hud 2>/dev/null || true
+claude plugins install claude-hud 2>/dev/null || echo "  → claude-hud: install manually with: claude plugins marketplace add jarrodwatts/claude-hud && claude plugins install claude-hud"
+echo ""
 echo "Reminder - manually configure:"
-echo "  - claude-mem plugin (/plugin marketplace add thedotmack/claude-mem)"
-echo "  - claude-hud plugin (/plugin install claude-hud@jarrodwatts)"
 echo "  - Telegram Channel (Phase 3)"
