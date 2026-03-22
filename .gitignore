@@ -20,3 +20,10 @@ memory/session.md
 # Secrets (never commit)
 .env
 .env.*
+
+# Daily generated briefs (ephemeral, not version-controlled)
+outbox/daily/*.md
+
+# Second-brain inbox (temporary capture, not version-controlled)
+second-brain/inbox/*
+!second-brain/inbox/.gitkeep
