@@ -23,8 +23,20 @@ fi
 # ── Skills ────────────────────────────────────────────────────────────────────
 if [ -d "$REPO_DIR/.claude/skills" ]; then
   mkdir -p "$CLAUDE_DIR/skills"
-  # Copy .md skill files (not the codex symlink — that stays repo-local)
+  # Copy flat .md skill files
   find "$REPO_DIR/.claude/skills" -maxdepth 1 -name "*.md" -exec cp {} "$CLAUDE_DIR/skills/" \;
+  # Copy directory-based skills (subdirs containing SKILL.md), excluding ms-office skills that stay repo-local
+  for skill_dir in "$REPO_DIR/.claude/skills"/*/; do
+    skill_name="$(basename "$skill_dir")"
+    # Skip: codex (has scripts/ with binaries), docx/pdf/pptx/xlsx (ms-office, repo-local)
+    case "$skill_name" in
+      codex|docx|pdf|pptx|xlsx) continue ;;
+    esac
+    if [ -f "$skill_dir/SKILL.md" ]; then
+      mkdir -p "$CLAUDE_DIR/skills/$skill_name"
+      cp "$skill_dir/SKILL.md" "$CLAUDE_DIR/skills/$skill_name/SKILL.md"
+    fi
+  done
   log "skills → $CLAUDE_DIR/skills/"
 else
   warn "No skills directory found — skipping"

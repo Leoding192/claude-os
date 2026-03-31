@@ -25,12 +25,15 @@ Dual-engine code review: Claude code-reviewer agent + Codex, side-by-side with a
 
 4. **Codex review** — run Codex independently (blind — do not show CLAUDE_REVIEW to Codex):
    ```bash
-   ~/claude-os/.agents/skills/codex/scripts/ask_codex.sh \
+   # 使用 codex-bridge 确定性调用（比 ask_codex.sh 更可靠：直接 codex exec，无 agent loop，无 LLM 触发不稳定问题）
+   RESULT_FILE="/tmp/codex_adversarial_$(date +%s).txt"
+   git diff HEAD | codex exec \
      "You are doing a blind code review. Review the following diff for correctness, security vulnerabilities, edge cases, performance issues, and maintainability problems. Be specific and critical. Cite file:line for every issue. Suggest a concrete fix for each issue found." \
-     --read-only \
-     --reasoning high
+     --read-only > "$RESULT_FILE" 2>&1
+   cat "$RESULT_FILE"
    ```
    Capture output as CODEX_REVIEW.
+   Fallback (if codex exec fails): use `~/.claude/skills/codex/scripts/ask_codex.sh` with `--read-only --reasoning high`.
 
 5. **Compare** — identify overlapping issues:
    - **AGREED**: issues where both engines flag the same file:line or same logical problem
