@@ -48,7 +48,13 @@ Start a tracked task with full state management.
 
 ```bash
 python3 -c "
-import json, datetime
+import json, datetime, os, subprocess
+root = subprocess.run(
+    ['git', 'rev-parse', '--show-toplevel'],
+    capture_output=True, text=True
+).stdout.strip() or os.path.expanduser('~/claude-os')
+tasks_log = os.path.join(root, 'logs', 'tasks.jsonl')
+os.makedirs(os.path.dirname(tasks_log), exist_ok=True)
 entry = {
   'task_id': '<id>',
   'intent': '<intent>',
@@ -63,7 +69,7 @@ entry = {
   'result_summary': '<summary>',
   'error': None
 }
-with open('/Users/dingfuying/claude-os/logs/tasks.jsonl', 'a') as f:
+with open(tasks_log, 'a') as f:
     f.write(json.dumps(entry) + '\n')
 "
 ```

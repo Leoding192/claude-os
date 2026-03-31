@@ -2,7 +2,7 @@
 name: task-planner
 description: Use this agent to decompose complex tasks into structured, executable plans before implementation begins. Invoke when the task involves multiple steps, architectural decisions, cross-file changes, or uncertain scope.
 tools: Read, Grep, Glob, WebFetch, WebSearch
-model: opus
+model: claude-opus-4-6
 memory: user
 ---
 

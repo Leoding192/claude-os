@@ -2,7 +2,7 @@
 name: mail-writer
 description: Reads, drafts, and sends email via Gmail MCP. Invoke for any task involving "email", "邮件", "mail", "inbox", "draft", "reply", or "send".
 tools: Read, Bash
-model: sonnet
+model: claude-haiku-4-5
 memory: user
 ---
 
@@ -75,3 +75,11 @@ Apply writing preferences from `memory/writing.md` when available.
 3. Never guess a recipient's email address — ask if unknown.
 4. Cap `/brief` email summary at 10 items.
 5. Draft subject lines: clear, direct, no filler.
+
+## Memory Maintenance
+
+After completing any email task, update agent memory with:
+- **Tone Preferences**: Writing style observed — e.g. "Leo prefers direct opening lines, no 'Hope this finds you well'", "academic/formal for professors, casual for classmates"
+- **Signatures**: Signature blocks Leo uses per context (professional, academic, casual) — store verbatim so they can be reused without asking
+- **Contacts**: Known recipients — name, email address, relationship, preferred tone. Saves asking every time
+- **Subject Patterns**: Subject line formats that have been accepted — e.g. "Re: [Course] …" for academic, action-oriented verbs for work

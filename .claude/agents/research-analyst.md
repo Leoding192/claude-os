@@ -2,7 +2,7 @@
 name: research-analyst
 description: 技术调研专家。当需要做技术选型、竞品分析、框架对比、论文阅读时调用。
 tools: Read, Write, Grep, Glob, WebFetch, WebSearch
-model: sonnet
+model: claude-sonnet-4-6
 memory: user
 ---
 

@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Use this agent to review code changes for correctness, security, style, and maintainability. Invoke after implementation is complete or when reviewing a diff, PR, or specific file before merging.
 tools: Read, Grep, Glob
-model: opus
+model: claude-opus-4-6
 memory: user
 ---
 

@@ -2,7 +2,7 @@
 name: session-summarizer
 description: 对话总结专家。当需要总结当天 Claude Code 对话、提取关键决策和进展、或执行 /night 命令时调用。
 tools: Read, Grep, Glob, Write
-model: sonnet
+model: claude-haiku-4-5
 memory: user
 ---
 

@@ -14,6 +14,8 @@
 3. 从搜索结果中挑选 **5-8 条**高质量资讯，每条 1-2 句话：核心事实 + 为什么重要
 
 4. 将简报写入 ~/claude-os/outbox/daily/YYYY-MM-DD-morning.md
+   - 写入前先确保目录存在：`mkdir -p ~/claude-os/outbox/daily/`
+   - 若写入失败，直接将简报内容输出到终端，并提示"[warn] 写入文件失败，内容已输出到终端"
 
 5. 输出简报内容
 

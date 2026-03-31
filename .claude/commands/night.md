@@ -12,6 +12,8 @@
    - 1-2 条明日建议（具体可执行）
 
 3. 将总结写入 ~/claude-os/outbox/daily/YYYY-MM-DD-night.md
+   - 写入前先确保目录存在：`mkdir -p ~/claude-os/outbox/daily/`
+   - 若写入失败，直接将总结内容输出到终端，并提示"[warn] 写入文件失败，内容已输出到终端"
 
 4. 询问用户：「明天早上想看哪些资讯？」
    - 将回答写入 session.md 的 Tomorrow Topics 部分

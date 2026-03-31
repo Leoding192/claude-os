@@ -2,7 +2,7 @@
 name: news-curator
 description: AI/数据/金融资讯搜索和整理。当需要搜索行业新闻、技术趋势、市场动态、或执行 /morning 命令时调用。
 tools: Read, Write, Grep, WebFetch, WebSearch
-model: sonnet
+model: claude-haiku-4-5
 memory: user
 ---
 

@@ -94,7 +94,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/claude-os/logs/compactions && cp ~/claude-os/memory/session.md ~/claude-os/logs/compactions/session-$(date +%Y%m%d-%H%M%S).md 2>/dev/null && echo '[claude-os] session.md backed up before compaction' || true"
+            "command": "root=$(git -C \"${CLAUDE_PROJECT_DIR:-$PWD}\" rev-parse --show-toplevel 2>/dev/null || echo \"$HOME/claude-os\"); mkdir -p \"$root/logs/compactions\" && cp \"$root/memory/session.md\" \"$root/logs/compactions/session-$(date +%Y%m%d-%H%M%S).md\" 2>/dev/null && echo '[claude-os] session.md backed up before compaction' || true"
           }
         ]
       }
