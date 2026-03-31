@@ -69,7 +69,7 @@
         "Docs: https://help.figma.com/hc/en-us/articles/32132100833559"
       ],
       "type": "http",
-      "url": "https://api.figma.com/mcp"
+      "url": "https://mcp.figma.com/mcp"
     },
 
     "filesystem": {
