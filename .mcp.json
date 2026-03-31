@@ -57,6 +57,21 @@
       "_status": "active — no server entry needed, uses Bash/osascript"
     },
 
+    "figma": {
+      "_comment": [
+        "Figma MCP — official remote MCP server by Figma.",
+        "Provides: read design files, frames, components, styles, variables.",
+        "Setup:",
+        "  1. In Claude Code, run /mcp → select Figma → complete OAuth in browser",
+        "  2. Figma free plan: 6 tool calls/month. Pro plan: unlimited.",
+        "  3. Alternative: Figma Desktop app local MCP (no call limit).",
+        "Transport: HTTP (remote), no local server needed.",
+        "Docs: https://help.figma.com/hc/en-us/articles/32132100833559"
+      ],
+      "type": "http",
+      "url": "https://api.figma.com/mcp"
+    },
+
     "filesystem": {
       "_comment": [
         "Official Filesystem MCP server — read/write local files.",
