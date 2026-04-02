@@ -62,59 +62,31 @@ claude-os/
 | `/write <topic>` | Writing pipeline: draft → Codex blind review → revised output |
 
 ## Memory
-| Layer | Location | Injected? | Purpose |
-|---|---|---|---|
-| L1 | `memory/session.md` | ✅ Every session | Current work state (≤50 lines) |
-| L2 | `memory/projects/<name>.md` | ❌ On demand | Per-project decisions and context |
-| L3 | `memory/decisions.md`, `memory/people/`, `memory/writing.md` | ❌ On demand | Durable decisions, people context, writing style |
-| L4 | `memory/archive/YYYY-MM/` | ❌ Never | Archived stale L3 entries (retained 2 years) |
+**Quick:** Only write to L1–L3 on explicit `/remember` or "记住" signal. Never auto-promote.
 
-**Write rule:** Only write to L1–L3 on explicit `/remember` or "记住" signal. Never auto-promote.
-
-See full spec: [docs/memory-schema.md](docs/memory-schema.md)
+See full spec: [docs/memory-schema.md](docs/memory-schema.md) — L1–L4 layer definitions, write rules, decay policy
 
 ## Orchestration Rules
 
 Before starting any multi-step task:
-1. Write `~/claude-os/logs/current-task.json` with state PLANNING (use `/task` command)
-2. Produce a plan, wait for user approval before changing state to EXECUTING
-3. Before any Confirm-tier capability: set state AWAITING_CONFIRMATION, surface the action, require explicit "yes"
-4. On completion: append to `logs/tasks.jsonl`, delete `current-task.json`
-5. On session end with incomplete task: Stop hook auto-writes CANCELLED to `tasks.jsonl`
-6. Never chain more than 3 tool calls without surfacing status to user
-7. On unrecoverable error: set state FAILED, surface clearly, do not retry silently
+1. Use `/task` command to track state (PLANNING → EXECUTING → COMPLETED)
+2. Produce a plan, wait for user approval before executing
+3. Never chain >3 tool calls without surfacing status
+4. On unrecoverable error: surface clearly, do not retry silently
 
-See full spec: [docs/runtime-state-model.md](docs/runtime-state-model.md)
+## Risk Model & Permission Tiers
 
-## Automation Risk Model
+**Quick:** Auto / Confirm / Blocked — see [docs/risk-model.md](docs/risk-model.md) for scoring formula, permission tiers, and audit logging
 
-Before invoking any capability:
-1. Look up `capability_id` in `docs/capability-registry.md` — if not found, hard block
-2. If registered tier is **Blocked**, hard block regardless of context
-3. Compute `risk_score = max(blast_radius, reversibility) * 0.5 + confidence_uncertainty * 0.3 + external_side_effect * 0.2`
-4. Apply floor rule: execution path = max(computed_path, registered_tier_floor)
-5. Execute path:
-   - Score 0.0–0.3 → **Auto** (silent)
-   - Score 0.4–0.6 → **Confirm** (surface summary, require "yes")
-   - Score 0.7–1.0 → **Escalate** (do not attempt; ask user to confirm intent first)
-6. When intent is inferred rather than explicit, add confidence_uncertainty = 0.5–1.0
+## Commands & Skills
 
-See full spec: [docs/automation-risk-model.md](docs/automation-risk-model.md)
-
-## Security & Governance
-
-### Permission Tiers
-| Tier | Examples | Behaviour |
-|---|---|---|
-| **Auto** | Read files, read email, search, git read, run codex | Execute silently |
-| **Confirm** | Write/delete files, send email, git push, modify calendar | Show action summary → require explicit "yes" |
-| **Blocked** | Push to main, touch .env/secrets, write prod config | Hard block, never execute |
-
-All capabilities are catalogued in [docs/capability-registry.md](docs/capability-registry.md).
-
-### Audit Log
-Confirm-tier Bash operations are logged to `logs/audit.jsonl` automatically via PostToolUse hook.
-Format: `{ timestamp, tool, action, result, confirmed_by_user }`
+See [docs/commands-ref.md](docs/commands-ref.md) for complete reference:
+- Work planning: `/plan`, `/task`
+- Code quality: `/review`, `/adversarial-review`, `/simplify`
+- Memory: `/remember`, `/capture`, `/consolidate`
+- Communication: `/brief`, `/draft-email`
+- Writing: `/write`
+- Explicit skills: `codex`, `gemini-fallback`, `demo-builder`, `research-analyst`, etc.
 
 ## Extending
 - New agent → `.claude/agents/<name>.md` with frontmatter `description`

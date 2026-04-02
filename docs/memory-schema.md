@@ -1,137 +1,115 @@
-# Memory Schema
+# Memory Architecture (L1–L4)
 
-Defines the four-layer memory system, write policy, and retention rules for claude-os.
+## Overview
 
----
-
-## Layers
-
-| Layer | Location | Injection | Write trigger | Retention |
-|---|---|---|---|---|
-| **L0 Ephemeral** | Context window only | — | Never written to disk | Session only |
-| **L1 Session** | `memory/session.md` | Every prompt (UserPromptSubmit hook) | User-initiated or session-end prompt | Overwritten each session |
-| **L2 Project** | `memory/projects/<name>.md` | On demand (`@memory/projects/<name>`) | `/remember` or explicit "记住" | Permanent until archived |
-| **L3 Persistent** | `memory/decisions.md`, `memory/people/*.md`, `memory/writing.md` | On demand | `/remember` or explicit "记住" | Permanent; quarterly review |
-| **L4 Archived** | `memory/archive/YYYY-MM/` | Never auto-injected | `/consolidate` moves stale L3 entries | Retained 2 years, then deleted |
+| Layer | Location | Injected? | Scope | Retention |
+|-------|----------|-----------|-------|-----------|
+| **L1** | `memory/session.md` | ✅ Every session | Current work (≤50 lines) | This session only |
+| **L2** | `memory/projects/<name>.md` | ❌ On demand | Per-project decisions & context | Per project |
+| **L3** | `memory/decisions.md`, `memory/people/`, `memory/writing.md` | ❌ On demand | Durable decisions, lessons, style | Until archived |
+| **L4** | `memory/archive/YYYY-MM/` | ❌ Never | Stale L3 entries | 2 years retention |
 
 ---
 
-## Write Policy
+## Layer Definitions
 
-| Transition | Allowed? | Trigger required |
-|---|---|---|
-| L0 → L1 | Yes | User-initiated or session-end prompt only |
-| L1 → L2/L3 | Yes | Explicit `/remember` or "记住" signal |
-| Any layer (auto-promotion) | **No** | System must never promote without user signal |
-| Cross-layer reads | Yes | Always allowed |
+### L1: Session State
+**File:** `memory/session.md`  
+**Auto-injected:** Yes, every session  
+**Max size:** 50 lines  
+**Content:** Current work state only
 
----
-
-## Hard Limits
-
-| Layer | Limit | Action on breach |
-|---|---|---|
-| L1 `session.md` | 50 lines max | Warn user; truncate oldest entries |
-| L3 total entries | 200 across all files | Require `/consolidate` before adding more |
-| L4 retention | 2 years | Delete (automated annually) |
-
----
-
-## Prohibited Content
-
-At any layer, the following must never be written:
-- Raw conversation transcripts
-- Credentials, tokens, or API keys
-- Other people's private communications (without their consent)
-- Speculative content that was not acted upon
-
----
-
-## L2: Project Memory
-
-Location: `memory/projects/<project-name>.md`
-
-Use for: project-specific decisions, architecture choices, known bugs, stakeholder context.
-
-Format:
 ```markdown
-# <Project Name>
+# Session State
+- In Progress
+- Blocked / Waiting On
+- Next Up
+- Captures
+- Recent Git Activity
+```
 
-## Decisions
-- <date> — <decision> — <rationale>
+**Rules:**
+- Never manually sync — it's auto-injected
+- Clear at end of long sessions
+- Keep prose minimal (bullets only)
 
-## Known Issues
-- <issue> — <status>
+---
 
-## Context
-- <anything that helps Claude understand this project>
+### L2: Project Context
+**Location:** `memory/projects/<project-name>.md`  
+**Auto-injected:** No, use `/remember` to write  
+**Scope:** One project per file  
+**Content:** 
+- Current goals & deadlines
+- Architecture decisions (why we chose X over Y)
+- Known tradeoffs
+- Integration points with other systems
+- Team members involved
+
+---
+
+### L3: Durable Decisions & Lessons
+**Locations:** 
+- `memory/decisions.md` — core lessons, rules that apply across projects
+- `memory/people/<name>.md` — working preferences & communication style
+- `memory/writing.md` — writing voice, tone, format preferences
+
+**Auto-injected:** No, but loaded when needed  
+**Content:** Things you've learned that should persist across sessions
+
+**decisions.md structure:**
+```markdown
+---
+name: Rule Name
+description: One-line hook for relevance
+type: feedback | user | project | reference
+---
+
+## Rule
+[What to do / not do]
+
+**Why:** [Context/incident that led to this]
+**How to apply:** [When/where this matters]
 ```
 
 ---
 
-## L3: Persistent Memory
-
-### `memory/decisions.md`
-
-Settled cross-project decisions and lessons learned. Format:
-```markdown
-## <YYYY-MM-DD> — <Title>
-<Decision or lesson>
-**Why:** <rationale>
-**How to apply:** <when this applies>
-```
-
-### `memory/people/<name>.md`
-
-Collaborator context. One file per person. Format:
-```markdown
-# <Name>
-- **Role:** <role>
-- **Preferences:** <communication preferences>
-- **Context:** <relevant background>
-```
-
-### `memory/writing.md`
-
-Leo's writing preferences and style guidelines. Used by the `mail-writer` agent and any writing tasks.
+### L4: Archive
+**Location:** `memory/archive/YYYY-MM/`  
+**Content:** Stale L3 entries, consolidated via `/consolidate` command  
+**Retention:** 2 years
 
 ---
 
-## `/consolidate` Command
+## Write Rules
 
-See `.claude/commands/consolidate.md` for the full procedure.
+✅ **DO**
+- Write to L1 (session.md) automatically every session
+- Write to L2/L3 **only on explicit `/remember` or "记住" signal**
+- Use `/consolidate` periodically to archive stale L3 entries
+- Include frontmatter (name, description, type) in L2/L3 files
 
-Summary:
-1. Read all L3 entries
-2. Identify stale entries (not referenced in last 90 days, or explicitly superseded)
-3. Move stale entries to `memory/archive/YYYY-MM/`
-4. Update `memory/decisions.md` with a consolidation note
-5. Report: N entries archived, M entries retained
+❌ **DON'T**
+- Auto-promote L1 → L2/L3 without user signal
+- Create duplicate memories without checking first
+- Save code patterns, file paths, architecture (already in codebase)
+- Save git history or recent commits (use git log)
+- Save ephemeral task details or debugging recipes
 
 ---
 
-## Auto-Clear on Session End
+## Memory Decay & Updates
 
-The Stop hook automatically rewrites `session.md` when a session ends:
+Memory becomes stale when:
+- A decision changes (update the file, don't create a new one)
+- A lesson proves wrong (delete and note why in Git commit)
+- Context fundamentally changes (move to archive, start fresh)
 
-1. Extracts any `- [ ]` incomplete tasks from all sections
-2. Extracts the first non-empty "In Progress" item as a one-line summary
-3. Rewrites the file with:
-   - `> Last session: YYYY-MM-DD — <summary>` header line
-   - Incomplete tasks carried forward under `## Next Up`
-   - Fresh empty template for the new session
-4. Prints: `[claude-os] session.md auto-cleared. N task(s) carried forward.`
+**Before acting on a memory:** Verify it's still accurate by checking the current codebase or file state.
 
-**What gets preserved**: incomplete `- [ ]` tasks + summary line
-**What gets cleared**: completed tasks, captures, blocked items, verbose detail
+---
 
-This means session.md never accumulates stale content. Durable information (decisions, writing preferences, people context) should be in L3, not L1.
-
-## Relationship to Session Injection
-
-The `UserPromptSubmit` hook reads `memory/session.md` and injects it into every prompt. This means:
-- Keep L1 short (≤ 50 lines)
-- Only current-session state belongs here
-- Historical decisions go in L3 (`decisions.md`)
-- Writing preferences go in L3 (`memory/writing.md`)
-- Project context goes in L2 (`memory/projects/`)
+## See Also
+- `/remember <thing>` — save to L3
+- `/consolidate` — archive stale entries
+- `/capture "<text>"` — quick note to L1
