@@ -15,6 +15,14 @@ echo "📚 Copying docs/ references..."
 mkdir -p "$TARGET_DIR/docs"
 cp -r "$SOURCE_DIR/docs/" "$TARGET_DIR/docs/"
 
+# Sync skills from .claude/skills/ to ~/.claude/skills/
+if [ -d "$SOURCE_DIR/.claude/skills" ]; then
+  echo "🧩 Syncing skills..."
+  mkdir -p "$TARGET_DIR/skills"
+  rsync -a --delete "$SOURCE_DIR/.claude/skills/" "$TARGET_DIR/skills/"
+  echo "Skills synced: $(ls "$TARGET_DIR/skills" | wc -l | tr -d ' ') items"
+fi
+
 echo "✅ Sync complete"
 echo ""
 echo "Documentation synced:"
