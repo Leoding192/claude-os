@@ -93,10 +93,6 @@
           {
             "type": "command",
             "command": "python3 -c \"\nimport os, re, datetime\ntry:\n    root = os.popen('git -C \\\"' + os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd()) + '\\\" rev-parse --show-toplevel 2>/dev/null').read().strip() or os.path.expanduser('~/claude-os')\n    session_file = os.path.join(root, 'memory', 'session.md')\n    decisions_file = os.path.join(root, 'memory', 'decisions.md')\n    if not os.path.exists(session_file):\n        exit(0)\n    with open(session_file) as f:\n        content = f.read()\n    pattern = re.compile(r'\\u51b3\\u5b9a|decided|\\u6539\\u4e3a|\\u9009\\u62e9|\\u4e0d\\u7528|\\u6362\\u6210|\\u91c7\\u7528|\\u653e\\u5f03|\\u6700\\u7ec8\\u7528', re.IGNORECASE)\n    decisions = [l.strip() for l in content.splitlines() if pattern.search(l) and not l.strip().startswith('#')]\n    if not decisions:\n        exit(0)\n    today = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')\n    entry = '\\n## ' + today + ' \\u81ea\\u52a8\\u63d0\\u53d6\\n' + '\\n'.join('- ' + l.lstrip('- ') for l in decisions[:5])\n    with open(decisions_file, 'a') as f:\n        f.write(entry + '\\n')\n    print(f'[claude-os] \\u81ea\\u52a8\\u63d0\\u53d6 {len(decisions[:5])} \\u6761\\u51b3\\u7b56\\u5230 decisions.md')\nexcept Exception as e:\n    print(f'[claude-os] warn: \\u51b3\\u7b56\\u63d0\\u53d6\\u5931\\u8d25: {e}')\n\" 2>/dev/null || true"
-          },
-          {
-            "type": "command",
-            "command": "python3 ~/claude-os/hooks/auto-memory.py 2>/dev/null || true"
           }
         ]
       }
@@ -141,6 +137,5 @@
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
     }
-  },
-  "model": "haiku"
+  }
 }

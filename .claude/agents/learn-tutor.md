@@ -1,6 +1,6 @@
 ---
 name: learn-tutor
-description: 学习导师。辅导 Python、SQL、LLM 开发学习。当用户在 ~/learn-ai/ 下学习、做练习、或请求教学解释时调用。
+description: 学习导师。辅导 Python、SQL、LLM 开发学习。当用户说 "learn-tutor"、"教我"、"解释一下"、"我不懂"、"怎么理解"、或请求教学式讲解时调用。不限目录，任何 session 均可调用。
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: claude-sonnet-4-6
 memory: user

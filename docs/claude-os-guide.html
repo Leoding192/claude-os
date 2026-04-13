@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude OS — Leo's Personal AI Layer</title>
+  <style>
+    :root {
+      --bg:        #080810;
+      --bg-1:      #0f0f1a;
+      --bg-2:      #16162a;
+      --bg-3:      #1e1e35;
+      --border:    #2a2a45;
+      --border-hi: #3d3d65;
+      --text:      #e8e8f0;
+      --text-2:    #9999bb;
+      --text-3:    #6666aa;
+      --accent:    #7c3aed;
+      --accent-hi: #9d5cf0;
+      --accent-glow: rgba(124,58,237,0.22);
+      --cyan:      #06b6d4;
+      --cyan-dim:  rgba(6,182,212,0.12);
+      --green:     #10b981;
+      --green-dim: rgba(16,185,129,0.12);
+      --amber:     #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --red:       #ef4444;
+      --red-dim:   rgba(239,68,68,0.1);
+      --radius:    10px;
+      --sidebar-w: 248px;
+      --font: -apple-system, 'Inter', 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      position: fixed; top: 0; left: 0;
+      width: var(--sidebar-w); height: 100vh;
+      background: var(--bg-1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto; z-index: 100;
+    }
+    .sidebar-logo { padding: 22px 18px 14px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo .mark { display: flex; align-items: center; gap: 10px; }
+    .sidebar-logo .icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--accent), var(--cyan));
+      border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .sidebar-logo .wordmark { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
+    .sidebar-logo .sub { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+    .sidebar-search { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .sidebar-search input {
+      width: 100%; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--font); font-size: 12px; padding: 6px 10px; outline: none; transition: border-color 0.15s;
+    }
+    .sidebar-search input:focus { border-color: var(--accent); }
+    .sidebar-search input::placeholder { color: var(--text-3); }
+    .sidebar-nav { flex: 1; padding: 6px 8px; }
+    .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); padding: 8px 10px 3px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 10px; border-radius: 5px; color: var(--text-2);
+      text-decoration: none; font-size: 12px; transition: all 0.12s; cursor: pointer;
+    }
+    .nav-link:hover, .nav-link.active { background: var(--bg-3); color: var(--text); }
+    .nav-link.active { color: var(--accent-hi); }
+    .nav-link .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-hi); flex-shrink: 0; }
+    .nav-link.active .dot { background: var(--accent); }
+    .sidebar-footer { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-3); }
+    .sidebar-footer a { color: var(--text-3); text-decoration: none; }
+
+    /* ── Main ── */
+    #main { margin-left: var(--sidebar-w); padding: 0 44px 80px; max-width: 980px; }
+
+    /* ── Hero ── */
+    #hero { padding: 56px 0 44px; border-bottom: 1px solid var(--border); margin-bottom: 44px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-glow); border: 1px solid rgba(124,58,237,0.4);
+      border-radius: 100px; padding: 3px 11px; font-size: 10px; font-weight: 600;
+      color: var(--accent-hi); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 18px;
+    }
+    .hero-title {
+      font-size: 38px; font-weight: 800; line-height: 1.15; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 0%, #b0a0e0 55%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 14px;
+    }
+    .hero-sub { font-size: 15px; color: var(--text-2); max-width: 540px; line-height: 1.7; margin-bottom: 28px; }
+    .hero-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+    .hero-stat .num { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .hero-stat .lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── Quick Nav Cards ── */
+    .qnav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 56px; }
+    .qnav-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 14px; text-decoration: none; color: var(--text);
+      transition: all 0.18s; position: relative; overflow: hidden;
+    }
+    .qnav-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--card-accent, var(--accent)); opacity: 0; transition: opacity 0.18s;
+    }
+    .qnav-card:hover { border-color: var(--border-hi); background: var(--bg-2); transform: translateY(-2px); }
+    .qnav-card:hover::before { opacity: 1; }
+    .qnav-icon { font-size: 22px; margin-bottom: 9px; display: block; }
+    .qnav-name { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+    .qnav-desc { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+    .qnav-count {
+      margin-top: 9px; font-size: 10px; font-family: var(--font-mono);
+      color: var(--text-3); background: var(--bg-3); border-radius: 4px;
+      padding: 3px 7px; display: inline-block;
+    }
+
+    /* ── Section ── */
+    .section { margin-bottom: 60px; }
+    .section-header {
+      display: flex; align-items: center; gap: 11px;
+      margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;
+    }
+    .section-title { font-size: 20px; font-weight: 800; letter-spacing: -0.4px; }
+    .section-tag {
+      font-size: 10px; background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 100px; padding: 2px 9px; color: var(--text-3); letter-spacing: 0.3px;
+    }
+    .section-sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 18px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: var(--bg-2); border-bottom: 1px solid var(--border); }
+    thead th { padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-2); }
+    td { padding: 11px 14px; vertical-align: top; color: var(--text-2); }
+    td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); white-space: nowrap; }
+
+    /* ── Tags ── */
+    .tag { display: inline-block; font-size: 10px; font-weight: 600; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.2px; }
+    .tag-green  { background: var(--green-dim); color: var(--green); }
+    .tag-cyan   { background: var(--cyan-dim);  color: var(--cyan); }
+    .tag-amber  { background: var(--amber-dim); color: var(--amber); }
+    .tag-purple { background: var(--accent-glow); color: var(--accent-hi); }
+    .tag-red    { background: var(--red-dim);   color: var(--red); }
+    .tag-gray   { background: var(--bg-3); color: var(--text-3); border: 1px solid var(--border); }
+
+    /* ── Inline code ── */
+    code {
+      font-family: var(--font-mono); font-size: 12px;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 5px; color: var(--cyan);
+    }
+
+    /* ── Agent cards ── */
+    .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .agent-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+    }
+    .agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .agent-name { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text); }
+    .agent-model { font-size: 10px; }
+    .agent-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 9px; }
+    .agent-tools { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tool-chip {
+      font-size: 10px; font-family: var(--font-mono);
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 3px; padding: 2px 6px; color: var(--text-3);
+    }
+
+    /* ── Skill groups ── */
+    .skill-group-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-3); margin: 20px 0 10px;
+    }
+    .skill-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+    .skill-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .skill-name { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .skill-src { font-size: 10px; color: var(--text-3); margin-bottom: 7px; }
+    .skill-desc { font-size: 11px; color: var(--text-2); line-height: 1.45; }
+
+    /* ── Memory cards ── */
+    .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+    .memory-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; }
+    .layer-badge { font-size: 11px; font-weight: 800; font-family: var(--font-mono); padding: 3px 8px; border-radius: 5px; margin-bottom: 9px; display: inline-block; }
+    .mc-l1 .layer-badge { background: rgba(16,185,129,0.15); color: var(--green); }
+    .mc-l2 .layer-badge { background: var(--cyan-dim); color: var(--cyan); }
+    .mc-l3 .layer-badge { background: var(--accent-glow); color: var(--accent-hi); }
+    .mc-l4 .layer-badge { background: var(--amber-dim); color: var(--amber); }
+    .memory-card .mc-name { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+    .memory-card .mc-path { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-bottom: 6px; }
+    .memory-card .mc-desc { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+    .memory-card .mc-inject { margin-top: 8px; font-size: 10px; }
+
+    /* ── Hook cards ── */
+    .hook-list { display: flex; flex-direction: column; gap: 8px; }
+    .hook-row {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+      display: grid; grid-template-columns: 160px 160px 1fr; gap: 16px; align-items: start;
+    }
+    .hook-event { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--accent-hi); }
+    .hook-matcher { font-size: 11px; color: var(--text-3); font-family: var(--font-mono); }
+    .hook-action { font-size: 12px; color: var(--text-2); }
+
+    /* ── Plugin cards ── */
+    .plugin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .plugin-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+    }
+    .plugin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .plugin-name { font-family: var(--font-mono); font-size: 13px; font-weight: 700; }
+    .plugin-enabled { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    .plugin-src { font-size: 10px; color: var(--text-3); margin-bottom: 7px; }
+    .plugin-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+    /* ── MCP cards ── */
+    .mcp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mcp-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; }
+    .mcp-header { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .mcp-name { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text); }
+    .mcp-type { font-size: 10px; }
+    .mcp-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 8px; }
+    .mcp-examples { font-size: 11px; color: var(--text-3); font-style: italic; }
+
+    /* ── Commands table ── */
+    .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .cmd-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .cmd-name { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--cyan); margin-bottom: 4px; }
+    .cmd-desc { font-size: 12px; color: var(--text-2); }
+    .cmd-when { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+    /* ── Callout ── */
+    .callout { border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; display: flex; gap: 10px; }
+    .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .callout-body p { color: var(--text-2); font-size: 12px; }
+    .callout.info { background: var(--cyan-dim); border: 1px solid rgba(6,182,212,0.2); }
+    .callout.warn { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.2); }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      #sidebar { display: none; }
+      #main { margin-left: 0; padding: 0 16px 60px; }
+      .qnav-grid { grid-template-columns: repeat(3, 1fr); }
+      .memory-grid { grid-template-columns: repeat(2, 1fr); }
+      .agent-grid { grid-template-columns: 1fr; }
+      .hook-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+    @media (max-width: 560px) {
+      .hero-title { font-size: 26px; }
+      .qnav-grid { grid-template-columns: repeat(2, 1fr); }
+      .skill-grid { grid-template-columns: repeat(2, 1fr); }
+      .plugin-grid, .mcp-grid, .cmd-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="mark">
+      <div class="icon">⚡</div>
+      <div>
+        <div class="wordmark">Claude OS</div>
+        <div class="sub">Leo's Personal AI Layer</div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" placeholder="/ to search..." id="searchInput" oninput="filterNav(this.value)">
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a href="#hero" class="nav-link active"><span class="dot"></span>Home</a>
+
+    <div class="nav-label" style="margin-top:6px">Core</div>
+    <a href="#agents" class="nav-link"><span class="dot"></span>Agents <span style="margin-left:auto;font-size:10px;color:var(--text-3)">10</span></a>
+    <a href="#skills" class="nav-link"><span class="dot"></span>Skills <span style="margin-left:auto;font-size:10px;color:var(--text-3)">26+</span></a>
+    <a href="#memory" class="nav-link"><span class="dot"></span>Memory <span style="margin-left:auto;font-size:10px;color:var(--text-3)">L1–L4</span></a>
+    <a href="#mcp" class="nav-link"><span class="dot"></span>MCP <span style="margin-left:auto;font-size:10px;color:var(--text-3)">6</span></a>
+    <a href="#hooks" class="nav-link"><span class="dot"></span>Hooks <span style="margin-left:auto;font-size:10px;color:var(--text-3)">6 events</span></a>
+    <a href="#plugins" class="nav-link"><span class="dot"></span>Plugins <span style="margin-left:auto;font-size:10px;color:var(--text-3)">3</span></a>
+    <a href="#commands" class="nav-link"><span class="dot"></span>Commands <span style="margin-left:auto;font-size:10px;color:var(--text-3)">13</span></a>
+
+    <div class="nav-label" style="margin-top:6px">Files</div>
+    <a href="#file-map" class="nav-link"><span class="dot"></span>File Map</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div>Claude OS · April 2026</div>
+    <div style="margin-top:3px">~/claude-os/docs/claude-os-guide.html</div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main id="main">
+
+  <!-- Hero -->
+  <section id="hero">
+    <div class="hero-badge">⚡ Personal Config Layer</div>
+    <h1 class="hero-title">Claude OS<br>— Leo's Setup</h1>
+    <p class="hero-sub">
+      版本控制的 Claude Code 个人配置层。10 个专职 Agent、26+ Skills、4 层 Memory、6 个 MCP 服务、6 种 Hook 事件，以及 3 个插件，全部跑在 <code>~/claude-os</code> 里。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">10</div><div class="lbl">Agents</div></div>
+      <div class="hero-stat"><div class="num">26+</div><div class="lbl">Skills</div></div>
+      <div class="hero-stat"><div class="num">L1–L4</div><div class="lbl">Memory</div></div>
+      <div class="hero-stat"><div class="num">6</div><div class="lbl">MCP</div></div>
+      <div class="hero-stat"><div class="num">6</div><div class="lbl">Hook Events</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="lbl">Plugins</div></div>
+    </div>
+  </section>
+
+  <!-- Quick Nav -->
+  <div class="qnav-grid">
+    <a href="#agents" class="qnav-card" style="--card-accent:#7c3aed">
+      <span class="qnav-icon">🤖</span>
+      <div class="qnav-name">Agents</div>
+      <div class="qnav-desc">10 个专职 AI 角色，Haiku / Sonnet / Opus 按任务自动选模型。</div>
+      <div class="qnav-count">10 agents</div>
+    </a>
+    <a href="#skills" class="qnav-card" style="--card-accent:#06b6d4">
+      <span class="qnav-icon">🔧</span>
+      <div class="qnav-name">Skills</div>
+      <div class="qnav-desc">文件格式 Skills + 21 个 impeccable UI 设计技能，需显式调用。</div>
+      <div class="qnav-count">26 skills</div>
+    </a>
+    <a href="#memory" class="qnav-card" style="--card-accent:#10b981">
+      <span class="qnav-icon">🧠</span>
+      <div class="qnav-name">Memory</div>
+      <div class="qnav-desc">L1 自动注入，L2 按项目，L3 持久决策，L4 月度归档。</div>
+      <div class="qnav-count">L1–L4</div>
+    </a>
+    <a href="#mcp" class="qnav-card" style="--card-accent:#f59e0b">
+      <span class="qnav-icon">🔌</span>
+      <div class="qnav-name">MCP</div>
+      <div class="qnav-desc">GitHub / Gmail / Calendar / Figma / Filesystem / Notifications 直连。</div>
+      <div class="qnav-count">6 services</div>
+    </a>
+    <a href="#hooks" class="qnav-card" style="--card-accent:#ef4444">
+      <span class="qnav-icon">⚙️</span>
+      <div class="qnav-name">Hooks + Plugins</div>
+      <div class="qnav-desc">6 种 Hook 事件自动运行 + claude-hud / Telegram / Codex 插件。</div>
+      <div class="qnav-count">6 events · 3 plugins</div>
+    </a>
+  </div>
+
+  <!-- ── Agents ── -->
+  <section id="agents" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--accent-glow)">🤖</div>
+      <h2 class="section-title">Agents</h2>
+      <span class="section-tag">10 agents · ~/.claude/agents/</span>
+    </div>
+    <p class="section-sub">每个 agent 有独立的模型选择和工具集。调用方式：在 Claude Code 对话中提到场景，系统根据 description 自动路由。</p>
+
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">task-planner</div>
+          <span class="tag tag-purple">Opus 4.6</span>
+        </div>
+        <div class="agent-desc">分解复杂任务，生成结构化执行计划。多步骤任务、架构决策、范围不清时触发。计划确认后才执行。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span><span class="tool-chip">WebFetch</span><span class="tool-chip">WebSearch</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">impl-coder</div>
+          <span class="tag tag-cyan">Sonnet 4.6</span>
+        </div>
+        <div class="agent-desc">代码实现专家。只在计划已批准、范围已锁定时调用。纯写代码，不规划不审查。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Write</span><span class="tool-chip">Edit</span><span class="tool-chip">Bash</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">code-reviewer</div>
+          <span class="tag tag-purple">Opus 4.6</span>
+        </div>
+        <div class="agent-desc">代码审查：正确性、安全性、风格、可维护性。合并前、高风险变更时调用。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">doc-writer</div>
+          <span class="tag tag-cyan">Sonnet 4.6</span>
+        </div>
+        <div class="agent-desc">文档生成与更新。文档缺失、过时或不清晰时调用。只解释重要的，不标注每个函数。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Write</span><span class="tool-chip">Edit</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">research-analyst</div>
+          <span class="tag tag-cyan">Sonnet 4.6</span>
+        </div>
+        <div class="agent-desc">技术调研专家。技术选型、竞品分析、框架对比、论文阅读时调用。可联网搜索。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Write</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span><span class="tool-chip">WebFetch</span><span class="tool-chip">WebSearch</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">learn-tutor</div>
+          <span class="tag tag-cyan">Sonnet 4.6</span>
+        </div>
+        <div class="agent-desc">学习导师。辅导 Python、SQL、LLM 开发学习。当在 ~/learn-ai/ 下学习或请求教学解释时调用。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Write</span><span class="tool-chip">Edit</span><span class="tool-chip">Bash</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">news-curator</div>
+          <span class="tag tag-green">Haiku 4.5</span>
+        </div>
+        <div class="agent-desc">AI / 数据 / 金融资讯搜索整理。搜索行业新闻、技术趋势、市场动态，或执行 /morning 时调用。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Write</span><span class="tool-chip">Grep</span><span class="tool-chip">WebFetch</span><span class="tool-chip">WebSearch</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">session-summarizer</div>
+          <span class="tag tag-green">Haiku 4.5</span>
+        </div>
+        <div class="agent-desc">对话总结专家。总结当天 Claude Code 对话、提取关键决策和进展，/night 时调用。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Grep</span><span class="tool-chip">Glob</span><span class="tool-chip">Write</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">cal-manager</div>
+          <span class="tag tag-green">Haiku 4.5</span>
+        </div>
+        <div class="agent-desc">Apple Calendar 读写，via AppleScript。"calendar" / "schedule" / "meeting" / "今天的日程" 触发。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Bash</span>
+        </div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name">mail-writer</div>
+          <span class="tag tag-green">Haiku 4.5</span>
+        </div>
+        <div class="agent-desc">Gmail 邮件读写，via Gmail MCP。"email" / "邮件" / "inbox" / "draft" / "reply" 触发。</div>
+        <div class="agent-tools">
+          <span class="tool-chip">Read</span><span class="tool-chip">Bash</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>模型分配策略</strong>
+        <p><span class="tag tag-purple">Opus 4.6</span> 用于需要深度推理的任务（task-planner、code-reviewer）；<span class="tag tag-cyan">Sonnet 4.6</span> 用于实现和研究；<span class="tag tag-green">Haiku 4.5</span> 用于轻量 IO 类任务（日历、邮件、新闻、总结）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Skills ── -->
+  <section id="skills" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--cyan-dim)">🔧</div>
+      <h2 class="section-title">Skills</h2>
+      <span class="section-tag">26 skills · ~/.claude/skills/</span>
+    </div>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Skills 需要显式调用</strong>
+        <p>所有 skills 不会自动触发。必须在 prompt 中明确提到 skill 名称或 /命令。</p>
+      </div>
+    </div>
+
+    <div class="skill-group-title">📄 文件格式 Skills（anthropics/skills · oil-oil/codex）</div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-name">docx</div>
+        <div class="skill-src">anthropics/skills</div>
+        <div class="skill-desc">创建、读取、编辑 Word .docx 文件。论文草稿、报告、合并文档。</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">pdf</div>
+        <div class="skill-src">anthropics/skills</div>
+        <div class="skill-desc">提取文本/表格、合并、拆分、填写 PDF 表单、添加水印。</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">pptx</div>
+        <div class="skill-src">anthropics/skills</div>
+        <div class="skill-desc">创建、编辑 PowerPoint 幻灯片。研究汇报、演示文稿。</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">xlsx</div>
+        <div class="skill-src">anthropics/skills</div>
+        <div class="skill-desc">读写 Excel / CSV / TSV，公式、图表、数据分析。IRR 等计算。</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">codex</div>
+        <div class="skill-src">oil-oil/codex</div>
+        <div class="skill-desc">Codex CLI 集成。只在用户显式说 "用 codex" 时调用。</div>
+      </div>
+    </div>
+
+    <div class="skill-group-title">🎨 Impeccable UI Design Skills（pbakaus/impeccable）</div>
+    <p class="section-sub" style="margin-bottom:12px">21 个 UI 设计能力，按需调用 /命令名。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Skill</th><th>用途</th><th>调用时机</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>/impeccable</td><td>生成高质量 production-grade 前端界面</td><td>从零构建精美 UI</td></tr>
+          <tr><td>/shape</td><td>规划 UX/UI 方案，结构化发现访谈后生成设计简报</td><td>写代码前先做设计</td></tr>
+          <tr><td>/animate</td><td>添加有目的的动画、微交互和动效</td><td>界面需要动感时</td></tr>
+          <tr><td>/adapt</td><td>跨屏幕尺寸适配，实现响应式断点和流式布局</td><td>移动端适配</td></tr>
+          <tr><td>/arrange</td><td>改善布局、间距和视觉节奏</td><td>网格单调、间距不统一</td></tr>
+          <tr><td>/audit</td><td>无障碍、性能、主题、响应式、反模式检查</td><td>上线前质量检查</td></tr>
+          <tr><td>/bolder</td><td>放大保守设计，增加视觉冲击力</td><td>设计太平庸</td></tr>
+          <tr><td>/clarify</td><td>改善 UX 文案、错误提示、标签，提升可理解性</td><td>文案不清晰</td></tr>
+          <tr><td>/colorize</td><td>为过于单色的界面添加战略性色彩</td><td>太灰太单调</td></tr>
+          <tr><td>/critique</td><td>从 UX 视角评估：视觉层级、情感共鸣、信息架构</td><td>需要设计 review</td></tr>
+          <tr><td>/delight</td><td>添加趣味性、个性化的小惊喜，让界面令人难忘</td><td>体验太无聊</td></tr>
+          <tr><td>/distill</td><td>去除多余复杂度，回归设计本质</td><td>界面太复杂</td></tr>
+          <tr><td>/extract</td><td>提取可复用组件、设计 token 和模式到设计系统</td><td>需要组件抽象</td></tr>
+          <tr><td>/harden</td><td>增强错误处理、i18n 支持、文本溢出、边缘情况</td><td>鲁棒性不足</td></tr>
+          <tr><td>/normalize</td><td>对齐 UI 到设计系统标准、间距和 token</td><td>不一致，需统一</td></tr>
+          <tr><td>/onboard</td><td>设计引导流、空状态、首次运行体验</td><td>新用户体验差</td></tr>
+          <tr><td>/optimize</td><td>诊断并修复加载速度、渲染、动画、图片、bundle 大小</td><td>性能问题</td></tr>
+          <tr><td>/overdrive</td><td>技术野心派：shader、弹簧物理、滚动特效</td><td>追求极致视觉</td></tr>
+          <tr><td>/polish</td><td>发布前最终质量检查，修复对齐、间距、细节</td><td>上线前 final check</td></tr>
+          <tr><td>/quieter</td><td>降低视觉强度，减少刺激感，保留质量</td><td>界面太吵闹</td></tr>
+          <tr><td>/typeset</td><td>改善字体选择、层级、字号、字重和可读性</td><td>排版问题</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="skill-group-title">🛠 其他独立 Skills</div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-name">gemini-fallback</div>
+        <div class="skill-src">自定义</div>
+        <div class="skill-desc">Claude quota 不足、需要 web search、或访问 Reddit 等时使用 Gemini CLI。触发词："用 gemini"。</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">demo-builder</div>
+        <div class="skill-src">自定义</div>
+        <div class="skill-desc">快速构建 web demo 页面。支持 Figma→代码、从零描述、截图→Figma 三种工作流。</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">codex-bridge</div>
+        <div class="skill-src">自定义</div>
+        <div class="skill-desc">通过确定性 codex exec 非交互模式调用 Codex CLI，快速 review、重构分析。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Memory ── -->
+  <section id="memory" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--green-dim)">🧠</div>
+      <h2 class="section-title">Memory</h2>
+      <span class="section-tag">4 layers · ~/claude-os/memory/</span>
+    </div>
+
+    <div class="memory-grid">
+      <div class="memory-card mc-l1">
+        <div class="layer-badge">L1</div>
+        <div class="mc-name">Session State</div>
+        <div class="mc-path">memory/session.md</div>
+        <div class="mc-desc">当前工作状态：In Progress、Blocked、Next Up、Captures。每次 session 自动注入。&lt;50 行，只记 bullets。</div>
+        <div class="mc-inject"><span class="tag tag-green">✅ 自动注入</span></div>
+      </div>
+      <div class="memory-card mc-l2">
+        <div class="layer-badge">L2</div>
+        <div class="mc-name">Project Context</div>
+        <div class="mc-path">memory/projects/&lt;name&gt;.md</div>
+        <div class="mc-desc">每个项目一个文件。当前目标、架构决策（为什么选 X）、已知 tradeoff、集成点。现有：hinf5026.md。</div>
+        <div class="mc-inject"><span class="tag tag-gray">按需读取</span></div>
+      </div>
+      <div class="memory-card mc-l3">
+        <div class="layer-badge">L3</div>
+        <div class="mc-name">Durable Decisions</div>
+        <div class="mc-path">memory/decisions.md<br>memory/people/<br>memory/writing.md</div>
+        <div class="mc-desc">持久决策 + 教训。/remember 写入。decisions.md 有 Decisions 表格 + Lessons Learned。writing.md 记录写作偏好。</div>
+        <div class="mc-inject"><span class="tag tag-gray">按需读取</span></div>
+      </div>
+      <div class="memory-card mc-l4">
+        <div class="layer-badge">L4</div>
+        <div class="mc-name">Archive</div>
+        <div class="mc-path">memory/archive/YYYY-MM/</div>
+        <div class="mc-desc">L3 陈旧条目的归档层。/consolidate 命令触发。保留 2 年。永不自动注入。</div>
+        <div class="mc-inject"><span class="tag tag-amber">月度 /consolidate</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>写入规则</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>/remember</td><td>唯一正确的 L3 写入方式。不能跳过 /remember 直接写 decisions.md。</td></tr>
+          <tr><td>/capture</td><td>快速写入 L1 session.md，适合不打断 flow 的临时记录。</td></tr>
+          <tr><td>不要自动晋级</td><td>L1→L3 需要显式 /remember 或"记住"信号，不能自动 promote。</td></tr>
+          <tr><td>L3 写入格式</td><td>rule/fact → Why: (原因) → How to apply: (适用场景)。结构化，不写流水账。</td></tr>
+          <tr><td>/consolidate</td><td>将 L3 中超过 30 天的陈旧条目迁移到 L4 archive。建议月度执行。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── MCP ── -->
+  <section id="mcp" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--amber-dim)">🔌</div>
+      <h2 class="section-title">MCP Integrations</h2>
+      <span class="section-tag">~/claude-os/.mcp.json</span>
+    </div>
+
+    <div class="mcp-grid">
+      <div class="mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-name">github</div>
+          <span class="tag tag-cyan">npx server</span>
+        </div>
+        <div class="mcp-desc">官方 GitHub MCP。读写 repo、issues、PR、branches、files、搜索。需设置 <code>GITHUB_PERSONAL_ACCESS_TOKEN</code> 环境变量。</div>
+        <div class="mcp-examples">→ "提交 PR 到 claude-os" / "查看 open issues" / "创建 feature branch"</div>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-name">gmail</div>
+          <span class="tag tag-green">Claude.ai 内置</span>
+        </div>
+        <div class="mcp-desc">Claude.ai 内置 Gmail 集成，无需本地服务。搜索邮件、读取线程、创建草稿、列标签。发送需 Confirm 权限。</div>
+        <div class="mcp-examples">→ "搜索来自导师的邮件" / "起草进度报告" / "列出未读邮件"</div>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-name">apple-calendar</div>
+          <span class="tag tag-amber">Bash/AppleScript</span>
+        </div>
+        <div class="mcp-desc">无独立服务器。cal-manager agent 通过 <code>osascript</code> 命令操作 Calendar.app。需授权 Terminal → Automation。</div>
+        <div class="mcp-examples">→ "明天有什么会议？" / "帮我安排下周一的会议" / "今天的日程"</div>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-name">figma</div>
+          <span class="tag tag-purple">Remote HTTP</span>
+        </div>
+        <div class="mcp-desc">官方 Figma MCP，远程 HTTP 连接 <code>mcp.figma.com/mcp</code>。读取设计文件、frames、组件、样式、变量。Free plan: 6 calls/month。</div>
+        <div class="mcp-examples">→ "把这个 Figma frame 转成 React 组件" / "获取设计 token"</div>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-name">filesystem</div>
+          <span class="tag tag-cyan">npx server</span>
+        </div>
+        <div class="mcp-desc">本地文件系统读写。允许访问目录：<code>~/claude-os</code> 和 <code>~/projects</code>。读取、写入、移动、搜索文件。</div>
+        <div class="mcp-examples">→ 直接文件操作（通常 Claude 自身工具已够，MCP 提供额外访问路径）</div>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-name">notifications</div>
+          <span class="tag tag-amber">Bash/osascript</span>
+        </div>
+        <div class="mcp-desc">macOS 系统通知，无独立服务器。通过 <code>osascript -e 'display notification...'</code>。/brief 完成时发通知。</div>
+        <div class="mcp-examples">→ 任务完成提醒 / /brief 推送 / Layer 4 定时任务提醒</div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">
+        <strong>computer-use 和 Telegram 通过 Plugins 接入</strong>
+        <p>Computer use（截图、鼠标键盘）和 Telegram（机器人消息）不在 .mcp.json 里，它们是 Claude Code Plugins，见下方 Plugins 章节。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Hooks ── -->
+  <section id="hooks" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--red-dim)">⚙️</div>
+      <h2 class="section-title">Hooks</h2>
+      <span class="section-tag">6 events · ~/claude-os/settings.json</span>
+    </div>
+
+    <div class="hook-list">
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">SessionStart</div>
+          <div class="hook-matcher">matcher: any</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">会话启动时</div>
+        <div class="hook-action">注入当前日期 + <code>memory/session.md</code> 内容 + 最近 git log，让 Claude 立即了解工作状态。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">PreToolUse</div>
+          <div class="hook-matcher">Edit|Write|MultiEdit|NotebookEdit</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">文件编辑前</div>
+        <div class="hook-action">检测当前 git branch，若为 main/master 则 <strong>BLOCK</strong> 并提示先创建 feature branch。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">PreToolUse</div>
+          <div class="hook-matcher">Edit|Write|MultiEdit</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">文件编辑前</div>
+        <div class="hook-action">检查文件路径，若包含 <code>.env</code> / <code>secrets</code> / <code>credentials</code> / <code>package-lock.json</code> 等则 <strong>BLOCK</strong>。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">PostToolUse</div>
+          <div class="hook-matcher">Edit|Write|MultiEdit</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">文件编辑后</div>
+        <div class="hook-action">按扩展名自动格式化：<code>.js/.ts/.json/.html/.md</code> → prettier；<code>.py</code> → black；<code>.go</code> → gofmt；<code>.sh</code> → shfmt。formatter 缺失时发警告。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">PostToolUse</div>
+          <div class="hook-matcher">Edit|Write|MultiEdit</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">文件编辑后</div>
+        <div class="hook-action">如果 <code>.ts/.tsx/.js/.jsx</code> 文件存在同名 <code>.test.*</code> 文件，自动运行 <code>npx jest</code>，输出最后 8 行失败信息。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">PostToolUse</div>
+          <div class="hook-matcher">Bash</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">Bash 执行后</div>
+        <div class="hook-action">Confirm 级别操作（git push / git reset --hard / rm -rf / send / delete）写入 <code>~/claude-os/logs/audit.jsonl</code> 审计日志。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">UserPromptSubmit</div>
+          <div class="hook-matcher">matcher: any</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">每次提交 prompt</div>
+        <div class="hook-action">注入 <code>memory/session.md</code> 内容到上下文，确保 Claude 始终知道当前任务状态。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">Stop</div>
+          <div class="hook-matcher">matcher: any (×4)</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">Claude 回复结束后</div>
+        <div class="hook-action">① 更新 session.md 提醒；② 追踪任务状态文件；③ 提醒 /remember；④ 运行 <code>hooks/auto-memory.py</code> 自动提取关键信息。</div>
+      </div>
+      <div class="hook-row">
+        <div>
+          <div class="hook-event">PreCompact</div>
+          <div class="hook-matcher">matcher: any</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">上下文压缩前</div>
+        <div class="hook-action">重新注入 session context（日期 + session.md），防止压缩后丢失工作状态。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Plugins ── -->
+  <section id="plugins" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">🔩</div>
+      <h2 class="section-title">Plugins</h2>
+      <span class="section-tag">3 enabled · ~/.claude/settings.json</span>
+    </div>
+    <p class="section-sub">Claude Code 插件，独立于 MCP。通过 Claude Code 插件市场安装，持久运行。</p>
+
+    <div class="plugin-grid">
+      <div class="plugin-card">
+        <div class="plugin-header">
+          <div class="plugin-name">claude-hud</div>
+          <div class="plugin-enabled"></div>
+        </div>
+        <div class="plugin-src">jarrodwatts/claude-hud · v0.0.10</div>
+        <div class="plugin-desc">状态栏（statusLine）插件。在终端底部实时显示 Claude 工作状态、当前任务、token 使用情况。由 Node.js 进程运行。</div>
+      </div>
+      <div class="plugin-card">
+        <div class="plugin-header">
+          <div class="plugin-name">telegram</div>
+          <div class="plugin-enabled"></div>
+        </div>
+        <div class="plugin-src">claude-plugins-official</div>
+        <div class="plugin-desc">Telegram Bot 集成。接收 Telegram 消息后可触发 Claude，通过 reply 工具回复。支持图片附件、消息反应。不能查看历史消息。</div>
+      </div>
+      <div class="plugin-card">
+        <div class="plugin-header">
+          <div class="plugin-name">codex</div>
+          <div class="plugin-enabled"></div>
+        </div>
+        <div class="plugin-src">openai/codex-plugin-cc</div>
+        <div class="plugin-desc">OpenAI Codex CLI 集成插件。配合 codex / codex-bridge skills 使用，实现 Claude + Codex 双引擎 review（/adversarial-review）。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Commands ── -->
+  <section id="commands" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.12)">⌨️</div>
+      <h2 class="section-title">Commands</h2>
+      <span class="section-tag">13 slash commands · ~/.claude/commands/</span>
+    </div>
+
+    <div class="cmd-grid">
+      <div class="cmd-card">
+        <div class="cmd-name">/plan &lt;task&gt;</div>
+        <div class="cmd-desc">调用 task-planner 分解任务，生成计划后等待批准再执行。</div>
+        <div class="cmd-when">触发：范围不清、3+ 步骤、架构影响</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/task &lt;intent&gt;</div>
+        <div class="cmd-desc">开启状态追踪任务（PLANNING → EXECUTING → COMPLETED），跨轮次保持进度。</div>
+        <div class="cmd-when">触发：需要持久化任务状态时</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/review [target]</div>
+        <div class="cmd-desc">代码审查，可选 Claude 或 Codex 引擎。传入文件路径、diff 或最近改动。</div>
+        <div class="cmd-when">触发：合并前、质量检查</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/adversarial-review</div>
+        <div class="cmd-desc">双引擎盲审：Claude code-reviewer agent + Codex 各自独立 review，并排比较结果。</div>
+        <div class="cmd-when">触发：高风险代码、架构决策</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/simplify [target]</div>
+        <div class="cmd-desc">检查代码复用性、质量、效率，自动修复发现的问题。</div>
+        <div class="cmd-when">触发：实现完成后，提交前</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/remember &lt;thing&gt;</div>
+        <div class="cmd-desc">将决策或教训持久化写入 <code>memory/decisions.md</code>（L3）。</div>
+        <div class="cmd-when">触发：有价值的经验、需跨 session 保留的规则</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/capture "&lt;text&gt;"</div>
+        <div class="cmd-desc">快速将想法 / 任务记录到 <code>memory/session.md</code>（L1），不打断工作流。</div>
+        <div class="cmd-when">触发：随手记，临时 note</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/consolidate</div>
+        <div class="cmd-desc">归档 L3 中陈旧的 memory 条目到 <code>memory/archive/</code>（L4）。</div>
+        <div class="cmd-when">触发：月度清理（建议每月一次）</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/brief [date]</div>
+        <div class="cmd-desc">日报：今日 Calendar 日程 + Gmail 邮件摘要。08:30 via launchd 也会自动运行。</div>
+        <div class="cmd-when">触发：早晨启动，或需要即时日报</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/morning</div>
+        <div class="cmd-desc">早间资讯：调用 news-curator，获取 AI / 数据 / 金融行业最新动态 + 任务优先级确认。</div>
+        <div class="cmd-when">触发：每天早晨</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/night</div>
+        <div class="cmd-desc">晚间收尾：调用 session-summarizer，总结今日进度 + 生成明日计划 + 更新 session.md。</div>
+        <div class="cmd-when">触发：每天结束工作前</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/draft-email &lt;desc&gt;</div>
+        <div class="cmd-desc">调用 mail-writer agent，以 Leo 的写作偏好起草邮件。</div>
+        <div class="cmd-when">触发：写重要邮件</div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-name">/write &lt;topic&gt;</div>
+        <div class="cmd-desc">写作流水线：Claude 起草 → Codex 盲审 → Claude 修订 → 最终输出。</div>
+        <div class="cmd-when">触发：文档、博客、正式写作</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <span class="tag tag-gray">已移除 / 合并</span>
+      <span style="font-size:12px;color:var(--text-3);margin-left:8px">/undo-last — 文件存在但作为 reference；/teach-impeccable 和 /frontend-design 已合并到 /impeccable。</span>
+    </div>
+  </section>
+
+  <!-- ── File Map ── -->
+  <section id="file-map" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--bg-3)">🗂</div>
+      <h2 class="section-title">File Map</h2>
+      <span class="section-tag">~/claude-os/</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>路径</th><th>内容</th><th>类型</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CLAUDE.md</td><td>全局规则（身份、硬规则、默认工作流、风险模型）</td><td><span class="tag tag-purple">规则</span></td></tr>
+          <tr><td>settings.json</td><td>Hooks 配置 + 环境变量 + 插件 + MCP（GitHub remote）</td><td><span class="tag tag-red">配置</span></td></tr>
+          <tr><td>.mcp.json</td><td>本地 MCP 服务器配置（github / figma / filesystem / apple-calendar / gmail / notifications）</td><td><span class="tag tag-amber">MCP</span></td></tr>
+          <tr><td>skills-lock.json</td><td>已安装 skills 的版本锁定（hash）</td><td><span class="tag tag-gray">锁文件</span></td></tr>
+          <tr><td>.claude/agents/*.md</td><td>10 个 agent 定义文件（frontmatter: name / description / tools / model）</td><td><span class="tag tag-cyan">Agent</span></td></tr>
+          <tr><td>.claude/commands/*.md</td><td>13 个 slash command 实现</td><td><span class="tag tag-cyan">命令</span></td></tr>
+          <tr><td>.claude/skills/</td><td>26+ skills symlink 目录</td><td><span class="tag tag-cyan">Skill</span></td></tr>
+          <tr><td>.agents/skills/</td><td>Skill 的实际安装位置（npx skills 安装到这里）</td><td><span class="tag tag-cyan">Skill</span></td></tr>
+          <tr><td>memory/session.md</td><td>L1 当前工作状态（自动注入）</td><td><span class="tag tag-green">Memory L1</span></td></tr>
+          <tr><td>memory/projects/*.md</td><td>L2 项目上下文（当前有 hinf5026.md）</td><td><span class="tag tag-cyan">Memory L2</span></td></tr>
+          <tr><td>memory/decisions.md</td><td>L3 持久决策与教训</td><td><span class="tag tag-purple">Memory L3</span></td></tr>
+          <tr><td>memory/writing.md</td><td>L3 写作偏好（学术风格、格式、修订习惯）</td><td><span class="tag tag-purple">Memory L3</span></td></tr>
+          <tr><td>memory/people/</td><td>L3 人员协作偏好</td><td><span class="tag tag-purple">Memory L3</span></td></tr>
+          <tr><td>memory/archive/</td><td>L4 归档（/consolidate 写入）</td><td><span class="tag tag-amber">Memory L4</span></td></tr>
+          <tr><td>docs/</td><td>memory-schema.md / risk-model.md / commands-ref.md / capability-map.html / 本文件</td><td><span class="tag tag-gray">文档</span></td></tr>
+          <tr><td>hooks/auto-memory.py</td><td>Stop hook 运行的自动内存提取脚本</td><td><span class="tag tag-red">Hook</span></td></tr>
+          <tr><td>logs/audit.jsonl</td><td>Confirm 级别操作的审计日志（自动写入）</td><td><span class="tag tag-gray">日志</span></td></tr>
+          <tr><td>bin/ / scripts/</td><td>辅助脚本（install.sh / sync.sh 等）</td><td><span class="tag tag-gray">工具</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Scroll spy
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -75% 0px' });
+  sections.forEach(s => observer.observe(s));
+
+  // Search
+  function filterNav(q) {
+    const lower = q.toLowerCase();
+    navLinks.forEach(link => {
+      link.style.opacity = (!q || link.textContent.toLowerCase().includes(lower)) ? '1' : '0.25';
+    });
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+      e.preventDefault();
+      document.getElementById('searchInput').focus();
+    }
+    if (e.key === 'Escape') {
+      const inp = document.getElementById('searchInput');
+      inp.blur(); inp.value = '';
+      filterNav('');
+    }
+  });
+</script>
+</body>
+</html>

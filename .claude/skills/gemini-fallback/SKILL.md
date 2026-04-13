@@ -84,3 +84,15 @@ ccusage blocks --live --plan pro
 - 代码质量低于 Claude Sonnet，重要任务仍用 Claude
 - 不支持直接操作本地文件系统（需要手动传内容）
 - Gemini 当前未安装：`npm install -g @google/gemini-cli && gemini auth login`
+
+## 搜索后处理（自动流程）
+
+当使用 `/gemini-fallback` 执行搜索任务时，完成后自动执行：
+
+1. 把 Gemini 返回的原始结果保存为变量
+2. 调用 **research-analyst agent**，传入：
+   - 原始问题
+   - Gemini 搜索结果全文
+3. research-analyst 输出结构化报告（一句话结论 → 关键发现 → 详细分析 → 来源 → 下一步建议）
+
+> 如果用户明确说不用整理或只要原始结果，跳过 research-analyst 步骤。
