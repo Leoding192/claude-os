@@ -65,10 +65,3 @@
 
 ### 自动化：auto-memory.py
 
-Stop hook 在每次对话结束时：① 更新 session.md 的 Active Project + Last Session；② 扫描 JSONL 提取含决策关键词的文本追加到 decisions.md；③ 写运行日志到 logs/memory-auto.log
-
-## 2026-04-12 自动提取（JSONL）
-- [2026-04-12][dingfuying] 探索完毕。发现 3 个与描述不符的现实，在出 plan 前必须先和你对齐。先把它们列给你看，再根据你的答复决定 plan 细节。  **发现的 3 个偏差：**  1. **`~/.claude/me
-
-## 2026-04-13 自动提取（JSONL）
-- [2026-04-13][dingfuying] `~/.claude` 不是 git repo，只有 `~/claude-os` 是。确认一下：你说的 `claude/claude.md` 的变更，是指 `~/claude-os/CLAUDE.md

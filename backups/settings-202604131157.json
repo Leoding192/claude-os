@@ -1,0 +1,146 @@
+{
+  "env": {
+    "MAX_THINKING_TOKENS": "10000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '--- SESSION CONTEXT ---'; echo '## Current Date'; date '+%Y-%m-%d %A'; echo ''; echo '## Work State'; cat ~/claude-os/memory/session.md 2>/dev/null || echo 'No session.md found'; echo ''; echo '## Recent Git Activity'; git log --oneline -5 2>/dev/null || echo 'Not in a git repo'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "branch=$(git branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ] || [ \"$branch\" = \"master\" ]; then echo \"BLOCKED: Direct edits on '$branch' branch are not allowed. Create a feature branch first.\"; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json, sys\nd = json.load(sys.stdin)\np = d.get('tool_input', {}).get('file_path', '') or d.get('tool_input', {}).get('path', '')\nblocked = ['.env', '.env.local', '.env.production', 'package-lock.json', '.git/', 'secrets', 'credentials']\nhit = [b for b in blocked if b in p]\nif hit:\n    print(f'BLOCKED: {p} is protected — matched rule: {hit[0]}', file=sys.stderr)\n    sys.exit(2)\n\" 2>&1"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -z \"$file\" ] || [ ! -f \"$file\" ]; then exit 0; fi; ext=\"${file##*.}\"; case \"$ext\" in js|ts|jsx|tsx|json|css|html|md) if command -v prettier &>/dev/null; then prettier --write \"$file\" 2>/dev/null; else echo \"[warn] prettier not found — $file not formatted\"; fi ;; py) if command -v black &>/dev/null; then black \"$file\" 2>/dev/null; else echo \"[warn] black not found — $file not formatted\"; fi ;; go) gofmt -w \"$file\" 2>/dev/null ;; sh|bash) if command -v shfmt &>/dev/null; then shfmt -w \"$file\" 2>/dev/null; else echo \"[warn] shfmt not found — $file not formatted\"; fi ;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os, subprocess\ntry:\n    d = json.load(sys.stdin)\n    fp = d.get('tool_input', {}).get('file_path', '')\n    if not fp or not any(fp.endswith(ext) for ext in ['.ts', '.tsx', '.js', '.jsx']):\n        sys.exit(0)\n    base, ext = os.path.splitext(fp)\n    testfile = base + '.test' + ext\n    if not os.path.exists(testfile):\n        sys.exit(0)\n    result = subprocess.run(\n        ['npx', 'jest', testfile, '--silent', '--no-coverage'],\n        capture_output=True, text=True, timeout=30,\n        cwd=os.path.dirname(fp) or '.'\n    )\n    if result.returncode != 0:\n        output = (result.stdout + result.stderr).strip()\n        lines = output.splitlines()\n        print('[test] FAILED — last 8 lines:')\n        print('\\n'.join(lines[-8:]))\n    else:\n        print('[test] passed')\nexcept subprocess.TimeoutExpired:\n    print('[test] timed out after 30s — skipping')\nexcept Exception:\n    pass\n\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os, datetime\ntry:\n    d = json.load(sys.stdin)\n    cmd = d.get('tool_input', {}).get('command', '')\n    result = d.get('tool_response', {}).get('output', '')[:200]\n    # Only log Confirm-tier Bash operations\n    confirm_patterns = ['git push', 'git reset --hard', 'security add-generic-password', 'rm -rf', 'send', 'delete']\n    if not any(p in cmd for p in confirm_patterns):\n        sys.exit(0)\n    log_dir = os.path.expanduser('~/claude-os/logs')\n    os.makedirs(log_dir, exist_ok=True)\n    entry = json.dumps({\n        'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',\n        'tool': 'Bash',\n        'action': cmd[:300],\n        'result': result,\n        'confirmed_by_user': True\n    })\n    with open(os.path.join(log_dir, 'audit.jsonl'), 'a') as f:\n        f.write(entry + '\\n')\nexcept Exception:\n    pass\n\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "root=$(git -C \"${CLAUDE_PROJECT_DIR:-$PWD}\" rev-parse --show-toplevel 2>/dev/null || echo \"$HOME/claude-os\"); session=\"$root/memory/session.md\"; if [ -f \"$session\" ]; then echo \"--- session.md ---\"; cat \"$session\"; echo \"--- end ---\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport os, re, datetime\n\nroot = os.popen('git -C \\\"' + os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd()) + '\\\" rev-parse --show-toplevel 2>/dev/null').read().strip() or os.path.expanduser('~/claude-os')\nsession_file = os.path.join(root, 'memory', 'session.md')\n\nif not os.path.exists(session_file):\n    exit(0)\n\ntry:\n    with open(session_file) as f:\n        content = f.read()\n\n    # Extract incomplete tasks (- [ ] lines) — skip blank template checkboxes\n    incomplete = [line.strip() for line in content.splitlines() if re.match(r'- \\\\[ \\\\] .+', line.strip())]\n\n    # Extract first non-empty In Progress item as summary\n    summary = ''\n    in_progress = re.search(r'## In Progress\\\\n(.*?)(?=##|\\\\Z)', content, re.DOTALL)\n    if in_progress:\n        for line in in_progress.group(1).splitlines():\n            line = line.strip()\n            if line and line not in ('-', '- [ ]'):\n                summary = re.sub(r'^- \\\\[.\\\\] ', '', line)[:80]\n                break\n\n    today = datetime.date.today().isoformat()\n    last_session_line = f'> Last session: {today}' + (f' — {summary}' if summary else '')\n\n    carried = '\\\\n'.join(incomplete) if incomplete else '-'\n\n    new_content = f\\\"\\\"\\\"# Session State\n\n> Injected at every session start. Keep this short — current work only.\n> For durable decisions and lessons, write to memory/decisions.md instead.\n\n{last_session_line}\n\n---\n\n## In Progress\n\n- [ ]\n\n## Blocked / Waiting On\n\n-\n\n## Next Up\n\n{carried}\n\n## Captures\n\n-\n\\\"\\\"\\\"\n\n    with open(session_file, 'w') as f:\n        f.write(new_content)\n\n    n = len(incomplete)\n    print(f'[claude-os] session.md auto-cleared. {n} task(s) carried forward.')\nexcept Exception as e:\n    print(f'[claude-os] warn: could not auto-clear session.md: {e}')\n\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json, os, datetime\ntask_file = os.path.expanduser('~/claude-os/logs/current-task.json')\ntasks_log = os.path.expanduser('~/claude-os/logs/tasks.jsonl')\nif not os.path.exists(task_file):\n    exit(0)\ntry:\n    with open(task_file) as f:\n        task = json.load(f)\n    task['final_state'] = 'CANCELLED'\n    task['completed_at'] = datetime.datetime.utcnow().isoformat() + 'Z'\n    task['result_summary'] = 'Session ended with task incomplete'\n    task['error'] = None\n    os.makedirs(os.path.dirname(tasks_log), exist_ok=True)\n    with open(tasks_log, 'a') as f:\n        f.write(json.dumps(task) + '\\n')\n    os.remove(task_file)\n    print('[claude-os] Incomplete task written to logs/tasks.jsonl as CANCELLED')\nexcept Exception as e:\n    print(f'[claude-os] warn: could not finalise task log: {e}')\n\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "echo 'Reminder: 如果本次 session 有重要进展，请使用 /remember 存储决策。'"
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport os, re, datetime\ntry:\n    root = os.popen('git -C \\\"' + os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd()) + '\\\" rev-parse --show-toplevel 2>/dev/null').read().strip() or os.path.expanduser('~/claude-os')\n    session_file = os.path.join(root, 'memory', 'session.md')\n    decisions_file = os.path.join(root, 'memory', 'decisions.md')\n    if not os.path.exists(session_file):\n        exit(0)\n    with open(session_file) as f:\n        content = f.read()\n    pattern = re.compile(r'\\u51b3\\u5b9a|decided|\\u6539\\u4e3a|\\u9009\\u62e9|\\u4e0d\\u7528|\\u6362\\u6210|\\u91c7\\u7528|\\u653e\\u5f03|\\u6700\\u7ec8\\u7528', re.IGNORECASE)\n    decisions = [l.strip() for l in content.splitlines() if pattern.search(l) and not l.strip().startswith('#')]\n    if not decisions:\n        exit(0)\n    today = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')\n    entry = '\\n## ' + today + ' \\u81ea\\u52a8\\u63d0\\u53d6\\n' + '\\n'.join('- ' + l.lstrip('- ') for l in decisions[:5])\n    with open(decisions_file, 'a') as f:\n        f.write(entry + '\\n')\n    print(f'[claude-os] \\u81ea\\u52a8\\u63d0\\u53d6 {len(decisions[:5])} \\u6761\\u51b3\\u7b56\\u5230 decisions.md')\nexcept Exception as e:\n    print(f'[claude-os] warn: \\u51b3\\u7b56\\u63d0\\u53d6\\u5931\\u8d25: {e}')\n\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/claude-os/hooks/auto-memory.py 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "root=$(git -C \"${CLAUDE_PROJECT_DIR:-$PWD}\" rev-parse --show-toplevel 2>/dev/null || echo \"$HOME/claude-os\"); mkdir -p \"$root/logs/compactions\" && cp \"$root/memory/session.md\" \"$root/logs/compactions/session-$(date +%Y%m%d-%H%M%S).md\" 2>/dev/null && echo '[claude-os] session.md backed up before compaction' || true"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/usr/local/bin/node /Users/dingfuying/.claude/plugins/cache/claude-hud/claude-hud/0.0.10/dist/index.js"
+  },
+  "enabledPlugins": {
+    "claude-hud@claude-hud": true,
+    "telegram@claude-plugins-official": true,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-hud": {
+      "source": {
+        "source": "github",
+        "repo": "jarrodwatts/claude-hud"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
+  "effortLevel": "medium",
+  "mcpServers": {
+    "github.com/github/github-mcp-server": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    }
+  },
+  "model": "haiku"
+}
