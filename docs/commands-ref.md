@@ -50,12 +50,6 @@ All commands are slash-commands or invoke via skill tool. Prefix with `/`.
 
 ---
 
-## Configuration & System
-
-| Command | Purpose | Triggers |
-|---------|---------|----------|
-| `/undo-last` | Undo the most recent Reversible-class action from session | Mistake, need to roll back |
-
 ---
 
 ## Explicit Skill Invocation
