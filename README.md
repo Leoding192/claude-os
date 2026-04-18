@@ -34,7 +34,7 @@ claude-os/
 ├── .claude/
 │   ├── settings.json          ← hooks
 │   ├── agents/                ← task-planner / impl-coder / code-reviewer / doc-writer / cal-manager / mail-writer
-│   ├── commands/              ← /plan /review /remember /brief /draft-email /capture /task /undo-last /consolidate
+│   ├── commands/              ← /plan /review /remember /brief /draft-email /capture /task /consolidate
 │   ├── skills/                ← review / debug / refactor workflows + codex
 │   └── hooks/                 ← (reserved for external hook scripts)
 ├── .agents/skills/codex/      ← OpenAI Codex skill (via npx skills add)
@@ -84,7 +84,6 @@ claude-os/
 | `/draft-email <desc>` | Draft an email with writing preferences applied |
 | `/capture "<text>"` | Quick-capture a thought or task into session memory |
 | `/task <intent>` | Start a state-tracked task with full PLANNING → EXECUTING lifecycle |
-| `/undo-last` | Undo the most recent Reversible-class action |
 | `/consolidate` | Archive stale L3 memory entries |
 
 ---
